@@ -1,0 +1,54 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build / dist
+dist/
+build/
+
+# Coverage
+coverage/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Cache
+.cache/
+.tmp/
+
+# Uploads (if using multer or similar)
+uploads/
+
+# Database (local files)
+*.sqlite
+*.db
+
+# PM2
+pids/
+*.pid
+*.seed
+
+# Misc
+*.bak
+*.swp

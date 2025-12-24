@@ -1,0 +1,14 @@
+//Backend
+express
+mongoose
+cors
+dotenv
+nodemon -D
+bcrypt
+jsonwebtoken
+nodemailer
+
+//Frontend
+react router dom
+axios
+tailwindcss @tailwindcss/vite -D
