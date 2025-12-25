@@ -1,60 +1,209 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import "./Header.css";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-const Header = ({ user, setUser }) => {
+const Header = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Safe auth read
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+
+  const firstLetter = user?.name?.charAt(0).toUpperCase() || "U";
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const close = () => setDropdownOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, []);
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
+    localStorage.clear();
+    setDropdownOpen(false);
+    navigate("/login");
   };
 
   return (
-    <div className="header">
-      <header>
-        <div className="container">
-          <div className="logo">
-            <Link to="/">
-              Car<span>ent</span>
-            </Link>
-          </div>
+    <header className="sticky top-0 z-50 bg-white shadow">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* LOGO */}
+          <Link to="/" className="text-2xl font-bold">
+            Car<span className="text-blue-600">Rent</span>
+          </Link>
 
-          <nav className="nav">
-            <Link to="/">Home</Link>
-            <Link to="/cars">Cars</Link>
-            <Link to="/brands">Brands</Link>
-            <Link to="/about">About</Link>
-            <Link to="/contact">Contact</Link>
+          {/* DESKTOP NAV */}
+          <nav className="hidden md:flex gap-8">
+            <Link to="/" className="nav-link">
+              Home
+            </Link>
+            <Link to="/cars" className="nav-link">
+              Cars
+            </Link>
+            <Link to="/about" className="nav-link">
+              About
+            </Link>
+            <Link to="/contact" className="nav-link">
+              Contact
+            </Link>
           </nav>
 
-          <div className="auth">
-            {user ? (
+          {/* RIGHT SIDE */}
+          <div className="hidden md:flex items-center gap-4 relative">
+            {!token ? (
               <>
-                <Link to="/profile" className="btn register">
-                  {user.name || "Profile"}
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="btn login"
-                  style={{ marginLeft: "10px" }}
+                <Link
+                  to="/register"
+                  className="px-4 py-2 border rounded-md hover:bg-gray-100"
                 >
-                  Logout
-                </button>
+                  Get Started
+                </Link>
               </>
             ) : (
               <>
-                <Link to="/login" className="btn login">
-                  Login
-                </Link>
-                <Link to="/register" className="btn register">
-                  Register
-                </Link>
+                {/* Avatar */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDropdownOpen(!dropdownOpen);
+                  }}
+                  className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center"
+                >
+                  {firstLetter}
+                </button>
+
+                {/* DROPDOWN */}
+                {dropdownOpen && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-14 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-fadeIn"
+                  >
+                    {/* USER INFO */}
+                    <div className="px-5 py-4 bg-gray-50 border-b">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-lg">
+                          {user?.name?.charAt(0).toUpperCase() || "U"}
+                        </div>
+
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            {user?.name || "User"}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate max-w-[180px]">
+                            {user?.email || "user@email.com"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* MENU */}
+                    <div className="py-2">
+                      <button
+                        onClick={() => navigate("/profile")}
+                        className="flex items-center gap-3 w-full px-5 py-3 text-gray-700 hover:bg-gray-100 transition"
+                      >
+                        <span className="text-lg">👤</span>
+                        <span className="font-medium">Profile</span>
+                      </button>
+
+                      <button
+                        onClick={() => navigate("/bookings")}
+                        className="flex items-center gap-3 w-full px-5 py-3 text-gray-700 hover:bg-gray-100 transition"
+                      >
+                        <span className="text-lg">🚗</span>
+                        <span className="font-medium">My Bookings</span>
+                      </button>
+                    </div>
+
+                    {/* LOGOUT */}
+                    <div className="border-t">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 w-full px-5 py-3 text-red-600 hover:bg-red-50 transition font-medium"
+                      >
+                        <span className="text-lg">🚪</span>
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
+
+          {/* MOBILE MENU BUTTON */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden text-2xl"
+          >
+            ☰
+          </button>
         </div>
-      </header>
-    </div>
+
+        {/* MOBILE MENU */}
+        {menuOpen && (
+          <div className="md:hidden py-4 space-y-4">
+            <Link to="/" className="block">
+              Home
+            </Link>
+            <Link to="/cars" className="block">
+              Cars
+            </Link>
+            <Link to="/about" className="block">
+              About
+            </Link>
+            <Link to="/contact" className="block">
+              Contact
+            </Link>
+
+            {!token ? (
+              <Link
+                to="/register"
+                className="block text-center py-2 bg-black text-white rounded"
+              >
+                Get Started
+              </Link>
+            ) : (
+              <div className="border-t pt-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center">
+                    {firstLetter}
+                  </div>
+                  <div>
+                    <p className="font-medium">{user?.name}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="mobile-btn"
+                >
+                  👤 Profile
+                </button>
+                <button
+                  onClick={() => navigate("/bookings")}
+                  className="mobile-btn"
+                >
+                  🚗 My Bookings
+                </button>
+
+                <button
+                  onClick={handleLogout}
+                  className="mobile-btn text-red-600"
+                >
+                  🚪 Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </header>
   );
 };
 

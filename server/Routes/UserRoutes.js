@@ -1,26 +1,16 @@
 import express from "express";
-import sendOtpMail from "../middleware/sendOtpMail.js";
-import { registerUser, verifyOtp, loginUser } from "../Controllers/user.js";
+import { loginUser, registerUser, verifyOtp } from "../Controllers/user.js";
+import sendOtpMail from "../Middleware/sendOtpMail.js"; // import middleware
 
 const router = express.Router();
 
-// REGISTER
-router.post(
-  "/register",
-  registerUser,
-  sendOtpMail,
-  (req, res) => {
-    res.status(201).json({
-      success: true,
-      message: "User registered. OTP sent to email.",
-    });
-  }
-);
+// Register a new user and send OTP
+router.post("/register", registerUser, sendOtpMail); // add sendOtpMail as middleware
 
-// VERIFY OTP
+// Verify OTP
 router.post("/verify-otp", verifyOtp);
 
-// LOGIN
+// Login
 router.post("/login", loginUser);
 
 export default router;
