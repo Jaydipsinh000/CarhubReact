@@ -33,7 +33,7 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           {/* LOGO */}
           <Link to="/" className="text-2xl font-bold">
-            Car<span className="text-blue-600">Rent</span>
+            Car<span className="text-blue-600">ent</span>
           </Link>
 
           {/* DESKTOP NAV */}
