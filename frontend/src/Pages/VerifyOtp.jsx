@@ -23,14 +23,6 @@ const VerifyOtp = () => {
       // 🔹 VERIFY OTP API
       const res = await api.post("/user/verify-otp", { email, otp });
 
-      /*
-        Assume backend response:
-        {
-          success: true,
-          token: "...",
-          user: { id, name, email }
-        }
-      */
 
       const { token, user } = res.data;
 

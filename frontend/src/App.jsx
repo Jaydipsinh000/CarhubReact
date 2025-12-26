@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
+
 import Header from "./Components/Header.jsx";
-import { Route, Routes } from "react-router-dom";
+import Footer from "./Components/Footer.jsx";
+
+// Public Pages
 import Home from "./Pages/Home.jsx";
-import Cars from "./Pages/Cars.jsx";
 import About from "./Pages/About.jsx";
 import Contact from "./Pages/Contact.jsx";
-import Footer from "./Components/Footer.jsx";
 import Register from "./Pages/Register.jsx";
 import Login from "./Pages/Login.jsx";
 import VerifyOtp from "./Pages/VerifyOtp.jsx";
+import Profile from "./Pages/Profile.jsx";
+import Cars from "./Pages/Cars.jsx";
+import CarDetails from "./Pages/CarDetails.jsx";
+
+// Admin
+import AdminDashboard from "./admin/AdminDashboard.jsx";
+import AdminCars from "./admin/AdminCars.jsx";
+import AdminRoute from "./Route/AdminRoute.jsx";
+import AdminAddCar from "./admin/AdminAddCar.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const location = useLocation();
 
-  // Load user from localStorage if already logged in
+  // 🔁 Load user on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -21,21 +33,57 @@ const App = () => {
     }
   }, []);
 
+  // 🔐 Hide header/footer on admin routes
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <>
-      <Header user={user} setUser={setUser} />
+      {/* ❌ No Header for Admin */}
+      {!isAdminRoute && <Header user={user} setUser={setUser} />}
 
       <Routes>
+        {/* ===== PUBLIC ROUTES ===== */}
         <Route path="/" element={<Home />} />
-        <Route path="/cars" element={<Cars />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/cars" element={<Cars />} />
+        <Route path="/cars/:id" element={<CarDetails />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
         <Route path="/verify-otp" element={<VerifyOtp setUser={setUser} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
+
+        {/* ===== ADMIN ROUTES ===== */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/cars"
+          element={
+            <AdminRoute>
+              <AdminCars />
+            </AdminRoute>
+          }
+        />
+      
+      <Route
+          path="/admin/addCar"
+          element={
+            <AdminRoute>
+              <AdminAddCar />
+            </AdminRoute>
+          }
+        />
       </Routes>
 
-      <Footer />
+      {/* ❌ No Footer for Admin */}
+      {!isAdminRoute && <Footer />}
     </>
   );
 };

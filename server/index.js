@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./Config/db.js";
 import userRoutes from "./Routes/UserRoutes.js";
+import carRoutes from "./Routes/CarRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/user", userRoutes);
+app.use("/api/cars", carRoutes);
 
 // Port
 const PORT = process.env.PORT || 5000;

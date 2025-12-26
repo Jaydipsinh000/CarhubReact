@@ -1,95 +1,50 @@
-import React, { useState } from "react";
-
-
-const carsData = [
-  {
-    id: 1,
-    name: "BMW X5",
-    brand: "BMW",
-    category: "SUV",
-    price: 8200,
-    image:
-      "https://wallpapercat.com/w/full/1/7/7/1682692-2249x1500-desktop-hd-bmw-x5-background-photo.jpg",
-  },
-  {
-    id: 2,
-    name: "Audi Q7",
-    brand: "Audi",
-    category: "SUV",
-    price: 7800,
-    image: "https://wallpapercave.com/wp/wp5057435.jpg",
-  },
-  {
-    id: 3,
-    name: "Mercedes GLE",
-    brand: "Mercedes",
-    category: "SUV",
-    price: 9000,
-    image: "https://wallpapercave.com/wp/wp8730442.jpg",
-  },
-  {
-    id: 4,
-    name: "BMW 3 Series",
-    brand: "BMW",
-    category: "Sedan",
-    price: 6500,
-    image: "https://wallpapercave.com/wp/wp1837798.jpg",
-  },
-  {
-    id: 5,
-    name: "Audi A6",
-    brand: "Audi",
-    category: "Sedan",
-    price: 7000,
-    image: "https://wallpapercave.com/wp/wp4152397.jpg",
-  },
-];
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchCars } from "../Services/carApi";
 
 const Cars = () => {
-  const [filter, setFilter] = useState("All");
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCars =
-    filter === "All"
-      ? carsData
-      : carsData.filter(
-          (car) =>
-            car.brand === filter || car.category === filter
-        );
+  useEffect(() => {
+    fetchCars()
+      .then((res) => setCars(res.data.cars))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-center mt-10">Loading cars...</p>;
 
   return (
-    <section className="cars-page">
-      <h1>
-        Our <span>Cars</span>
-      </h1>
+    <div className="max-w-7xl mx-auto px-4 py-10">
+      <h1 className="text-3xl font-bold mb-6 text-center">Available Cars</h1>
 
-      {/* FILTER BUTTONS */}
-      <div className="filters">
-        {["All", "BMW", "Audi", "Mercedes", "SUV", "Sedan"].map((item) => (
-          <button
-            key={item}
-            className={filter === item ? "active" : ""}
-            onClick={() => setFilter(item)}
+      <div className="grid md:grid-cols-3 gap-6">
+        {cars.map((car) => (
+          <div
+            key={car._id}
+            className="bg-white rounded-lg shadow hover:shadow-lg transition duration-300"
           >
-            {item}
-          </button>
-        ))}
-      </div>
-
-      {/* CAR GRID */}
-      <div className="cars-grid">
-        {filteredCars.map((car) => (
-          <div className="car-card" key={car.id}>
-            <img src={car.image} alt={car.name} />
-            <div className="car-info">
-              <h3>{car.name}</h3>
-              <p>{car.category} • {car.brand}</p>
-              <h4>₹{car.price} / day</h4>
-              <button>Book Now</button>
+            <img
+              src={car.image}
+              alt={car.name}
+              className="h-48 w-full object-cover rounded-t-lg"
+            />
+            <div className="p-4">
+              <h2 className="font-bold text-lg">{car.name}</h2>
+              <p className="text-sm text-gray-600">{car.brand}</p>
+              <p className="mt-2 font-semibold">₹{car.pricePerDay}/day</p>
+              <Link
+                to={`/cars/${car._id}`}
+                className="block mt-4 text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+              >
+                View Details
+              </Link>
             </div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 

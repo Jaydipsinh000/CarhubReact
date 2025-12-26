@@ -111,17 +111,17 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
           {[
             {
-              img: "https://wallpapercave.com/wp/wp5052561.jpg",
+              img: "https://www.usnews.com/object/image/00000191-25b6-d8d6-a3fb-f5f6b8c60001/01-usnpx-2025bmwx5-angularfront-jmv.JPG?update-time=1722914668697&size=responsiveGallery&format=webp",
               name: "BMW X5",
               desc: "Perfect for luxury highway drives",
             },
             {
-              img: "https://wallpapercave.com/wp/wp10683432.jpg",
+              img: "https://hips.hearstapps.com/hmg-prod/images/2020-audi-a6-mmp-1-1567713400.jpg?crop=1.00xw:0.846xh;0,0.135xh&resize=1200:*",
               name: "Audi A6",
               desc: "Executive comfort & class",
             },
             {
-              img: "https://wallpapercave.com/wp/wp13496427.jpg",
+              img: "https://vehicle-images.dealerinspire.com/d55d-110009263/SAL1L9FU2PA110166/e9dd53db1fb106eeb9ff3a5366723176.jpg",
               name: "Range Rover",
               desc: "Power, presence & performance",
             },
