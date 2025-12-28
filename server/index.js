@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin:  "https://carent-nu.vercel.app" || "http://localhost:5173", // Vite default port
+    origin:  ["https://carent-nu.vercel.app", "http://localhost:5173"], // Vite default port
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
