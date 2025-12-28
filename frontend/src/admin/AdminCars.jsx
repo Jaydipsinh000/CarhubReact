@@ -4,9 +4,9 @@ import AdminLayout from "./AdminLayout";
 import { useNavigate } from "react-router-dom";
 
 const AdminCars = () => {
-    const navigate = useNavigate(); 
-    const [cars, setCars] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const loadCars = async () => {
     try {
@@ -92,8 +92,10 @@ const AdminCars = () => {
                       <div className="flex justify-center gap-4">
                         {/* EDIT (future) */}
                         <button
-                          disabled
-                          className="text-blue-600 hover:underline opacity-50 cursor-not-allowed"
+                          onClick={() =>
+                            navigate(`/admin/cars/update/${car._id}`)
+                          }
+                          className="px-3 py-1 bg-yellow-500 text-white rounded"
                         >
                           Edit
                         </button>

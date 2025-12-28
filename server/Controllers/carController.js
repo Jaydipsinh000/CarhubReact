@@ -5,15 +5,26 @@ import Car from "../Models/Cars.js";
 // =======================
 export const addCar = async (req, res) => {
   try {
-    const {
+    let {
       name,
       brand,
       pricePerDay,
       fuelType,
       seats,
       transmission,
-      image,
+      images, // expecting array of image URLs
     } = req.body;
+
+    // Ensure images is an array
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required",
+      });
+    }
+
+    // Main image is the first in array
+    const image = images[0];
 
     // Validation
     if (
@@ -38,13 +49,14 @@ export const addCar = async (req, res) => {
       fuelType,
       seats,
       transmission,
-      image,
+      image,   // main image
+      images,  // array of all images
     });
 
     res.status(201).json({
       success: true,
       message: "Car added successfully",
-      car, // ✅ correct variable
+      car,
     });
   } catch (error) {
     console.error("Add Car Error:", error);
@@ -56,11 +68,18 @@ export const addCar = async (req, res) => {
   }
 };
 
-
-// update cars
+// =======================
+// UPDATE CAR
+// =======================
 export const updateCar = async (req, res) => {
   try {
     const { id } = req.params;
+    let { images } = req.body;
+
+    // If images provided, update main image as first one
+    if (images && Array.isArray(images) && images.length > 0) {
+      req.body.image = images[0];
+    }
 
     const updatedCar = await Car.findByIdAndUpdate(
       id,
@@ -77,7 +96,6 @@ export const updateCar = async (req, res) => {
       message: "Car updated successfully",
       car: updatedCar,
     });
-
   } catch (error) {
     console.error("Update Car Error:", error.message);
 
@@ -88,23 +106,25 @@ export const updateCar = async (req, res) => {
   }
 };
 
-//deleteCar
-export const deleteCar = async (req,res)=>{
-  try{
-    const {id} = req.params;
+// =======================
+// DELETE CAR
+// =======================
+export const deleteCar = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    const deleteCar = await Car.findByIdAndDelete(id);
+    const deletedCar = await Car.findByIdAndDelete(id);
 
-    if(!deleteCar){
-      res.status(404).json({message:"Car not found.."});
+    if (!deletedCar) {
+      return res.status(404).json({ message: "Car not found" });
     }
 
-    res.status(201).json({message:"Car deleted successfully"});
+    res.status(200).json({ message: "Car deleted successfully" });
+  } catch (error) {
+    console.error("Delete Car Error:", error.message);
+    res.status(500).json({ message: "Car delete failed" });
   }
-  catch(error){
-    res.status(500).json({message:"Car delete failed.."});
-  }
-}
+};
 
 // =======================
 // GET ALL CARS (PUBLIC)

@@ -20,6 +20,8 @@ import AdminDashboard from "./admin/AdminDashboard.jsx";
 import AdminCars from "./admin/AdminCars.jsx";
 import AdminRoute from "./Route/AdminRoute.jsx";
 import AdminAddCar from "./admin/AdminAddCar.jsx";
+import ProtectedRoute from "./Route/ProtectedRoute.jsx";
+import AdminUpdateCar from "./admin/AdminUpdate.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -58,7 +60,9 @@ const App = () => {
           path="/admin/dashboard"
           element={
             <AdminRoute>
-              <AdminDashboard />
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
             </AdminRoute>
           }
         />
@@ -67,16 +71,30 @@ const App = () => {
           path="/admin/cars"
           element={
             <AdminRoute>
-              <AdminCars />
+              <ProtectedRoute>
+                <AdminCars />
+              </ProtectedRoute>
             </AdminRoute>
           }
         />
-      
-      <Route
+
+        <Route
           path="/admin/addCar"
           element={
             <AdminRoute>
-              <AdminAddCar />
+              <ProtectedRoute>
+                <AdminAddCar />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/cars/update/:id"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <AdminUpdateCar />
+              </ProtectedRoute>
             </AdminRoute>
           }
         />

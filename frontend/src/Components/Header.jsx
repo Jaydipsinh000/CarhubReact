@@ -114,7 +114,7 @@ const Header = () => {
                         onClick={() => navigate("/admin/dashboard")}
                         className="flex items-center gap-3 w-full px-5 py-3 text-gray-700 hover:bg-gray-100 transition"
                       >
-                        <span className="text-lg">👤</span>
+                        <span className="text-lg">📊</span>
                         <span className="font-medium">Dashbord</span>
                       </button>)}
 
