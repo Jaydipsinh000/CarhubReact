@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://carent-dgkk.onrender.com/api/user" || "http://localhost:5000/api/user";
+const API_URL = "https://carent-07up.onrender.com/api/user" || "http://localhost:5000/api/user";
 
 export const registerUser = (userData) => {
   return axios.post(`${API_URL}/register`, userData, {
