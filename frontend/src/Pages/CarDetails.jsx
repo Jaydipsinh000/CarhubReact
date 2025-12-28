@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchCarById } from "../Services/carApi";
+import { fetchCarById, fetchCars } from "../Services/carApi";
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -9,181 +9,216 @@ const CarDetails = () => {
   const [car, setCar] = useState(null);
   const [moreCars, setMoreCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState("description");
-  const [currentImage, setCurrentImage] = useState(0);
+  const [tab, setTab] = useState("overview");
+  const [imgIndex, setImgIndex] = useState(0);
 
   useEffect(() => {
-    const loadCar = async () => {
+    const load = async () => {
       try {
         const res = await fetchCarById(id);
+        const all = await fetchCars();
         setCar(res.data.car);
-        setCurrentImage(0);
-      } catch (err) {
-        console.error(err);
+        setMoreCars(all.data.cars.filter((c) => c._id !== id).slice(0, 4));
+      } finally {
+        setLoading(false);
       }
     };
-
-    const loadMoreCars = async () => {
-      try {
-        const res = await fetchAllCars();
-        // Exclude the current car
-        setMoreCars(res.data.cars.filter((c) => c._id !== id));
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    Promise.all([loadCar(), loadMoreCars()]).finally(() => setLoading(false));
+    load();
   }, [id]);
 
-  if (loading)
+  if (loading) {
     return (
-      <p className="text-center mt-20 text-gray-500 animate-pulse">
-        Loading car details...
-      </p>
+      <div className="flex justify-center items-center h-[60vh]">
+        <span className="animate-spin h-10 w-10 border-b-2 border-black rounded-full"></span>
+      </div>
     );
+  }
 
-  if (!car)
-    return (
-      <p className="text-center mt-20 text-red-500 font-semibold">
-        Car not found
-      </p>
-    );
+  if (!car) return <p className="text-center mt-20">Car not found</p>;
 
-  const images = car.images && car.images.length ? car.images : [car.image];
-  const features = car.features || ["GPS", "Air Conditioning", "Bluetooth", "Music System"];
-
-  const prevImage = () =>
-    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  const nextImage = () =>
-    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  const images = car.images?.length ? car.images : [car.image];
+  const features = car.features || [
+    "GPS Navigation",
+    "Bluetooth",
+    "Air Conditioning",
+    "Music System",
+    "ABS",
+    "Airbags",
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-      {/* ===== CAR IMAGE GALLERY ===== */}
-      <div className="grid md:grid-cols-5 gap-6">
-        {/* MAIN IMAGE */}
-        <div className="md:col-span-4 relative rounded-2xl overflow-hidden shadow-xl bg-black">
-          <img
-            src={images[currentImage]}
-            alt={car.name}
-            className="w-full h-[420px] object-cover transition-all duration-500"
-          />
-          {images.length > 1 && (
-            <>
-              <button
-                onClick={prevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full shadow transition"
-              >
-                ❮
-              </button>
-              <button
-                onClick={nextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full shadow transition"
-              >
-                ❯
-              </button>
-            </>
-          )}
-          <div className="absolute bottom-4 right-4 bg-black/60 text-white px-4 py-1 rounded-full text-sm">
-            {currentImage + 1} / {images.length}
-          </div>
-        </div>
+    <div className="bg-gray-50 min-h-screen">
+      {/* ===== HERO SECTION ===== */}
+      <div className="max-w-7xl mx-auto px-4 pt-10">
+        <div className="grid lg:grid-cols-2 gap-10">
+          
+          {/* ===== HERO IMAGE GALLERY ===== */}
+          <div className="w-full">
+            {/* MAIN IMAGE */}
+            <div className="relative w-full overflow-hidden rounded-3xl shadow-xl bg-black">
+              <div className="aspect-[16/9] sm:aspect-[4/3] lg:aspect-[16/9]">
+                <img
+                  src={images[imgIndex]}
+                  alt={car.name}
+                  className="w-full h-full object-contain sm:object-cover transition-all duration-500"
+                />
+              </div>
 
-        {/* THUMBNAILS */}
-        <div className="md:col-span-1 flex md:flex-col gap-3 overflow-y-auto h-[420px]">
-          {images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt={`${car.name}-${idx}`}
-              onClick={() => setCurrentImage(idx)}
-              className={`w-full h-24 object-cover rounded-xl cursor-pointer border-2 transition-all ${
-                idx === currentImage
-                  ? "border-blue-600 scale-105 shadow-lg"
-                  : "border-gray-300 hover:scale-105"
-              }`}
-            />
-          ))}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={() =>
+                      setImgIndex(
+                        imgIndex === 0 ? images.length - 1 : imgIndex - 1
+                      )
+                    }
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow"
+                  >
+                    ❮
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setImgIndex(
+                        imgIndex === images.length - 1 ? 0 : imgIndex + 1
+                      )
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow"
+                  >
+                    ❯
+                  </button>
+                </>
+              )}
+
+              {/* Image Counter */}
+              <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                {imgIndex + 1} / {images.length}
+              </div>
+            </div>
+
+            {/* THUMBNAILS */}
+            {images.length > 1 && (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    onClick={() => setImgIndex(i)}
+                    className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${
+                      imgIndex === i
+                        ? "border-blue-600 scale-105"
+                        : "border-transparent hover:border-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="space-y-6">
+            <h1 className="text-4xl font-extrabold">{car.name}</h1>
+            <p className="text-gray-500 text-lg">{car.brand}</p>
+
+            {/* Quick Specs */}
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <span>🚗 Seats: {car.seats || 5}</span>
+              <span>⚙️ {car.transmission || "Automatic"}</span>
+              <span>⛽ {car.fuelType}</span>
+              <span>🛡 Insurance Included</span>
+            </div>
+
+            {/* Trust badges */}
+            <div className="flex gap-4 text-sm text-gray-600">
+              <span>✔ Free Cancellation</span>
+              <span>✔ 24x7 Support</span>
+              <span>✔ Sanitized Cars</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Car Info & Tabs */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+      {/* ===== CONTENT + BOOKING ===== */}
+      <div className="max-w-7xl mx-auto px-4 py-14 grid lg:grid-cols-3 gap-10">
+        {/* LEFT CONTENT */}
+        <div className="lg:col-span-2 space-y-8">
           {/* Tabs */}
-          <div className="flex gap-4 border-b">
-            {["description", "specs", "reviews"].map((tab) => (
+          <div className="flex gap-6 border-b">
+            {["overview", "specs", "reviews"].map((t) => (
               <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={`py-2 px-4 font-semibold ${
-                  selectedTab === tab
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-600"
-                } transition`}
+                key={t}
+                onClick={() => setTab(t)}
+                className={`pb-3 font-semibold ${
+                  tab === t
+                    ? "border-b-2 border-black text-black"
+                    : "text-gray-500"
+                }`}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {t.toUpperCase()}
               </button>
             ))}
           </div>
 
-          {/* Tab Content */}
-          {selectedTab === "description" && car.description && (
-            <div className="p-4 bg-white rounded-xl shadow">
-              <p className="text-gray-700">{car.description}</p>
+          {tab === "overview" && (
+            <p className="text-gray-700 leading-relaxed">
+              {car.description ||
+                "Experience luxury, comfort and performance with this premium rental car. Perfect for city rides and long journeys."}
+            </p>
+          )}
+
+          {tab === "specs" && (
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>🚗 Seats: {car.seats}</div>
+              <div>⚙️ Transmission: {car.transmission}</div>
+              <div>⛽ Fuel: {car.fuelType}</div>
+              <div>💰 ₹{car.pricePerDay} / day</div>
             </div>
           )}
-          {selectedTab === "specs" && (
-            <div className="p-4 bg-white rounded-xl shadow">
-              <h2 className="text-2xl font-semibold mb-4">Specifications</h2>
-              <div className="grid md:grid-cols-2 gap-4 text-gray-700">
-                <div>🚗 Seats: {car.seats}</div>
-                <div>⚙️ Transmission: {car.transmission}</div>
-                <div>⛽ Fuel Type: {car.fuelType}</div>
-                <div>💰 Price Per Day: ₹{car.pricePerDay}</div>
+
+          {tab === "reviews" && (
+            <div className="space-y-4">
+              <div className="bg-white p-4 rounded-xl shadow">
+                ⭐⭐⭐⭐⭐ <p>Excellent car, smooth drive!</p>
               </div>
-            </div>
-          )}
-          {selectedTab === "reviews" && (
-            <div className="p-4 bg-white rounded-xl shadow space-y-4">
-              <h2 className="text-2xl font-semibold mb-4">Customer Reviews</h2>
-              <div className="space-y-3">
-                <div className="p-4 border rounded-lg hover:shadow-lg transition">
-                  <p>"Amazing car, smooth drive and very comfortable!"</p>
-                  <p className="mt-2 font-semibold text-gray-700">- John D.</p>
-                </div>
-                <div className="p-4 border rounded-lg hover:shadow-lg transition">
-                  <p>"Great experience! Highly recommend renting from here."</p>
-                  <p className="mt-2 font-semibold text-gray-700">- Sarah K.</p>
-                </div>
+              <div className="bg-white p-4 rounded-xl shadow">
+                ⭐⭐⭐⭐☆ <p>Clean & well maintained.</p>
               </div>
             </div>
           )}
 
           {/* Features */}
-          <div className="mt-6 p-4 bg-white rounded-xl shadow">
-            <h2 className="text-2xl font-semibold mb-4">Features</h2>
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Features</h2>
             <div className="flex flex-wrap gap-3">
-              {features.map((feat, idx) => (
+              {features.map((f, i) => (
                 <span
-                  key={idx}
-                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                  key={i}
+                  className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm"
                 >
-                  {feat}
+                  {f}
                 </span>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Pricing & Booking */}
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-xl shadow-lg flex flex-col items-center">
-            <p className="text-sm font-medium">Starting From</p>
-            <p className="text-3xl font-bold my-2">₹{car.pricePerDay}/day</p>
-            <button className="mt-4 bg-white text-green-700 font-semibold px-6 py-3 rounded-xl w-full hover:bg-gray-100 transition">
+        {/* BOOKING CARD */}
+        <div className="sticky top-24 h-fit">
+          <div className="bg-white rounded-3xl shadow-xl p-6 space-y-6">
+            <div className="text-center">
+              <p className="text-gray-500">Starting From</p>
+              <p className="text-4xl font-extrabold text-green-600">
+                ₹{car.pricePerDay}
+              </p>
+              <p className="text-sm text-gray-500">per day</p>
+            </div>
+
+            <button className="w-full bg-black text-white py-3 rounded-xl text-lg hover:opacity-90">
               Book Now
+            </button>
+
+            <button onClick={() => navigate("/contact")} className="w-full border py-3 rounded-xl">
+              Contact Support
             </button>
           </div>
         </div>
@@ -191,23 +226,26 @@ const CarDetails = () => {
 
       {/* ===== MORE CARS ===== */}
       {moreCars.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-semibold mb-6">More Cars You May Like</h2>
-          <div className="grid md:grid-cols-4 gap-6">
+        <div className="max-w-7xl mx-auto px-4 pb-20">
+          <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {moreCars.map((c) => (
               <div
                 key={c._id}
-                className="bg-white rounded-xl shadow p-4 cursor-pointer hover:shadow-lg transition"
                 onClick={() => navigate(`/cars/${c._id}`)}
+                className="bg-white rounded-xl shadow hover:shadow-lg cursor-pointer transition"
               >
                 <img
-                  src={c.images?.[0] || c.image}
-                  alt={c.name}
-                  className="w-full h-40 object-cover rounded-lg mb-3"
+                  src={c.image}
+                  className="h-40 w-full object-cover rounded-t-xl"
                 />
-                <h3 className="font-semibold text-gray-800">{c.name}</h3>
-                <p className="text-gray-600">{c.brand}</p>
-                <p className="text-green-700 font-bold">₹{c.pricePerDay}/day</p>
+                <div className="p-4">
+                  <h3 className="font-semibold">{c.name}</h3>
+                  <p className="text-gray-500 text-sm">{c.brand}</p>
+                  <p className="font-bold text-green-600">
+                    ₹{c.pricePerDay}/day
+                  </p>
+                </div>
               </div>
             ))}
           </div>

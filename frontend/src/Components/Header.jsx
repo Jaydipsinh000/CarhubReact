@@ -21,6 +21,11 @@ const Header = () => {
     return () => window.removeEventListener("click", close);
   }, []);
 
+  const closeMenuAndNavigate = (path) => {
+    setMenuOpen(false);
+    navigate(path);
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     setDropdownOpen(false);
@@ -111,12 +116,13 @@ const Header = () => {
                       </button>
                       {user?.role === "admin" && (
                         <button
-                        onClick={() => navigate("/admin/dashboard")}
-                        className="flex items-center gap-3 w-full px-5 py-3 text-gray-700 hover:bg-gray-100 transition"
-                      >
-                        <span className="text-lg">📊</span>
-                        <span className="font-medium">Dashbord</span>
-                      </button>)}
+                          onClick={() => navigate("/admin/dashboard")}
+                          className="flex items-center gap-3 w-full px-5 py-3 text-gray-700 hover:bg-gray-100 transition"
+                        >
+                          <span className="text-lg">📊</span>
+                          <span className="font-medium">Dashbord</span>
+                        </button>
+                      )}
 
                       <button
                         onClick={() => navigate("/bookings")}
@@ -155,16 +161,28 @@ const Header = () => {
         {/* MOBILE MENU */}
         {menuOpen && (
           <div className="md:hidden py-4 space-y-4">
-            <Link to="/" className="block">
+            <Link to="/" className="block" onClick={() => setMenuOpen(false)}>
               Home
             </Link>
-            <Link to="/cars" className="block">
+            <Link
+              to="/cars"
+              className="block"
+              onClick={() => setMenuOpen(false)}
+            >
               Cars
             </Link>
-            <Link to="/about" className="block">
+            <Link
+              to="/about"
+              className="block"
+              onClick={() => setMenuOpen(false)}
+            >
               About
             </Link>
-            <Link to="/contact" className="block">
+            <Link
+              to="/contact"
+              className="block"
+              onClick={() => setMenuOpen(false)}
+            >
               Contact
             </Link>
 
@@ -172,36 +190,31 @@ const Header = () => {
               <Link
                 to="/register"
                 className="block text-center py-2 bg-black text-white rounded"
+                onClick={() => setMenuOpen(false)}
               >
                 Get Started
               </Link>
             ) : (
               <div className="border-t pt-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center">
-                    {firstLetter}
-                  </div>
-                  <div>
-                    <p className="font-medium">{user?.name}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                  </div>
-                </div>
-
                 <button
-                  onClick={() => navigate("/profile")}
+                  onClick={() => closeMenuAndNavigate("/profile")}
                   className="mobile-btn"
                 >
                   👤 Profile
                 </button>
+
                 <button
-                  onClick={() => navigate("/bookings")}
+                  onClick={() => closeMenuAndNavigate("/bookings")}
                   className="mobile-btn"
                 >
                   🚗 My Bookings
                 </button>
 
                 <button
-                  onClick={handleLogout}
+                  onClick={() => {
+                    handleLogout();
+                    setMenuOpen(false);
+                  }}
                   className="mobile-btn text-red-600"
                 >
                   🚪 Logout

@@ -11,15 +11,31 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+
+// Allowed origins
+const allowedOrigins = [
+  "http://localhost:5174",        // Vite dev
+  "https://carent-nu.vercel.app" // Production
+];
+
+// CORS setup
 app.use(
   cors({
-    origin:  ["https://carent-nu.vercel.app", "http://localhost:5173"], // Vite default port
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
-// Database
+// Database connection
 connectDB();
 
 // Routes
