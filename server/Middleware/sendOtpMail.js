@@ -1,6 +1,6 @@
 import transporter from "../Config/mailer.js";
 
-const sendOtpMail = async (req, res) => {
+const sendOtpMail = async (req, res, next) => {
   try {
     if (!req.otpData) {
       return res.status(400).json({ message: "OTP data not found" });
@@ -102,15 +102,17 @@ const sendOtpMail = async (req, res) => {
 `,
     });
 
-    // Send response after email is sent
-    res.status(201).json({
+    // ✅ RESPONSE YAHI SE BHEJO
+    return res.status(201).json({
       success: true,
-      message: "User registered successfully. OTP sent to your email.",
+      message: "OTP sent to email",
       email,
     });
   } catch (error) {
-    console.error("❌ Send OTP Mail Error:", error.message);
-    res.status(500).json({ success: false, message: "Email sending failed" });
+    console.error("❌ Send OTP Mail Error:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Email sending failed" });
   }
 };
 
