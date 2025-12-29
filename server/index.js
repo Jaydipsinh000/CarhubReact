@@ -9,33 +9,29 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-
 // Allowed origins
 const allowedOrigins = [
-  "http://localhost:5174",        // Vite dev
-  "https://carent-nu.vercel.app" // Production
+  "http://localhost:5174",
+  "https://carent-nu.vercel.app",
 ];
 
-// CORS setup
+// ✅ CORS FIRST
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Database connection
+// ✅ Preflight
+app.options("*", cors());
+
+// Middleware
+app.use(express.json());
+
+// Database
 connectDB();
 
 // Routes
@@ -50,5 +46,5 @@ app.use("/api/cars", carRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port: http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

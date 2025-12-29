@@ -12,3 +12,5 @@ nodemailer
 react router dom
 axios
 tailwindcss @tailwindcss/vite -D
+@reduxjs/toolkit 
+react-redux

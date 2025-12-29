@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchCarById, fetchCars } from "../Services/carApi";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store/cartslice";
+
 
 const CarDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [car, setCar] = useState(null);
   const [moreCars, setMoreCars] = useState([]);
@@ -26,13 +30,30 @@ const CarDetails = () => {
     load();
   }, [id]);
 
+  // Add to cart handler
+  const handleAddToCart = () => {
+    const user = localStorage.getItem("user");
+    if(!user) {
+      alert("Please login to add items to cart");
+      navigate("/login");
+      return;
+    }
+    dispatch(addToCart({
+      id: car._id,
+      name: car.name,
+      pricePerDay: car.pricePerDay,
+      image: car.image,
+    })
+   );
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
         <span className="animate-spin h-10 w-10 border-b-2 border-black rounded-full"></span>
       </div>
     );
-  }
+  };
 
   if (!car) return <p className="text-center mt-20">Car not found</p>;
 
