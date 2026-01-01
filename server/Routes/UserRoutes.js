@@ -1,6 +1,7 @@
 import express from "express";
 import { loginUser, registerUser, verifyOtp } from "../Controllers/user.js";
 import sendOtpMail from "../Middleware/sendOtpMail.js"; // import middleware
+import authUser from "../Middleware/authUser.js";
 
 const router = express.Router();
 

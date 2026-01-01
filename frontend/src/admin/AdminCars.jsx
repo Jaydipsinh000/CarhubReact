@@ -85,7 +85,7 @@ const AdminCars = () => {
                     <td className="px-6 py-4 text-gray-600">{car.brand}</td>
 
                     <td className="px-6 py-4 font-semibold text-gray-700">
-                      ₹{car.pricePerDay}
+                      ₹{car.pricePerDay.toLocaleString("en-IN")}
                     </td>
 
                     <td className="px-6 py-4">

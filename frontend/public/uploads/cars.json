@@ -1,0 +1,247 @@
+[
+  {
+    "name": "Rolls Royce Phantom",
+    "brand": "Rolls Royce",
+    "pricePerDay": 570000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["phantom.jpg"]
+  },
+  {
+    "name": "Rolls Royce Ghost",
+    "brand": "Rolls Royce",
+    "pricePerDay": 560000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Ghost.jpg"]
+  },
+  {
+    "name": "Rolls Royce Cullinan",
+    "brand": "Rolls Royce",
+    "pricePerDay": 530000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["cullinan.jpg"]
+  },
+
+  {
+    "name": "Bentley Flying Spur",
+    "brand": "Bentley",
+    "pricePerDay": 70000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Bentley-flying.jpg"]
+  },
+  {
+    "name": "Bentley Bentayga",
+    "brand": "Bentley",
+    "pricePerDay": 68000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Bentley-bentayga.jpg"]
+  },
+
+  {
+    "name": "Mercedes Maybach S680",
+    "brand": "Mercedes-Benz",
+    "pricePerDay": 65000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Mercedes-Maybach-S680.jpg"]
+  },
+  {
+    "name": "Mercedes S-Class",
+    "brand": "Mercedes-Benz",
+    "pricePerDay": 67000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Mercedes S-Class.jpg"]
+  },
+  {
+    "name": "Mercedes G-Wagon G63",
+    "brand": "Mercedes-Benz",
+    "pricePerDay": 78000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["G-Wagon-G63.jpg"]
+  },
+
+  {
+    "name": "BMW 7 Series",
+    "brand": "BMW",
+    "pricePerDay": 89000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["BMW 7 series.jpg"]
+  },
+  {
+    "name": "BMW X7",
+    "brand": "BMW",
+    "pricePerDay": 199000,
+    "fuelType": "Diesel",
+    "seats": 7,
+    "transmission": "Automatic",
+    "images": ["BMW X7.jpg"]
+  },
+  {
+    "name": "BMW i7",
+    "brand": "BMW",
+    "pricePerDay": 67000,
+    "fuelType": "Electric",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["BMW i7.jpg"]
+  },
+
+  {
+    "name": "Audi A8L",
+    "brand": "Audi",
+    "pricePerDay": 48000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Audi A8L.jpg"]
+  },
+  {
+    "name": "Audi Q8",
+    "brand": "Audi",
+    "pricePerDay": 45000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Audi Q8.jpg"]
+  },
+  {
+    "name": "Audi RS7",
+    "brand": "Audi",
+    "pricePerDay": 70000,
+    "fuelType": "Petrol",
+    "seats": 4,
+    "transmission": "Automatic",
+    "images": ["Audi RS7.jpg"]
+  },
+
+  {
+    "name": "Range Rover Vogue",
+    "brand": "Land Rover",
+    "pricePerDay": 50000,
+    "fuelType": "Diesel",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Range Rover Vogue.jpg"]
+  },
+  {
+    "name": "Range Rover Sport",
+    "brand": "Land Rover",
+    "pricePerDay": 110000,
+    "fuelType": "Diesel",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Range Rover Sport.jpg"]
+  },
+  {
+    "name": "Range Rover Autobiography",
+    "brand": "Land Rover",
+    "pricePerDay": 92000,
+    "fuelType": "Diesel",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Range Rover Autobiography.jpg"]
+  },
+
+  {
+    "name": "Porsche Panamera",
+    "brand": "Porsche",
+    "pricePerDay": 56000,
+    "fuelType": "Petrol",
+    "seats": 4,
+    "transmission": "Automatic",
+    "images": ["Porsche Panamera.jpg"]
+  },
+  {
+    "name": "Porsche Cayenne",
+    "brand": "Porsche",
+    "pricePerDay": 98000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Porsche Cayenne.jpg"]
+  },
+
+  {
+    "name": "Lamborghini Urus",
+    "brand": "Lamborghini",
+    "pricePerDay": 95000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Lamborghini Urus.jpg"]
+  },
+
+  {
+    "name": "Ferrari Roma",
+    "brand": "Ferrari",
+    "pricePerDay": 110000,
+    "fuelType": "Petrol",
+    "seats": 2,
+    "transmission": "Automatic",
+    "images": ["Ferrari Roma.jpg"]
+  },
+
+  {
+    "name": "Maserati Quattroporte",
+    "brand": "Maserati",
+    "pricePerDay": 60000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Maserati Quattroporte.jpg"]
+  },
+
+  {
+    "name": "Jaguar XJ",
+    "brand": "Jaguar",
+    "pricePerDay": 85000,
+    "fuelType": "Petrol",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Jaguar XJ.jpg"]
+  },
+  {
+    "name": "Jaguar F-Pace",
+    "brand": "Jaguar",
+    "pricePerDay": 80000,
+    "fuelType": "Diesel",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Jaguar F-Pace.jpg"]
+  },
+
+  {
+    "name": "Tesla Model S",
+    "brand": "Tesla",
+    "pricePerDay": 42000,
+    "fuelType": "Electric",
+    "seats": 5,
+    "transmission": "Automatic",
+    "images": ["Tesla Model S.jpg"]
+  },
+  {
+    "name": "Tesla Model X",
+    "brand": "Tesla",
+    "pricePerDay": 48000,
+    "fuelType": "Electric",
+    "seats": 6,
+    "transmission": "Automatic",
+    "images": ["Tesla Model X.jpg"]
+  }
+]

@@ -10,7 +10,6 @@ const Cars = () => {
   const [search, setSearch] = useState("");
   const [brand, setBrand] = useState("All");
   const [fuel, setFuel] = useState("All");
-
   const [maxPriceInput, setMaxPriceInput] = useState("");
   const [appliedMaxPrice, setAppliedMaxPrice] = useState(null);
 
@@ -25,7 +24,6 @@ const Cars = () => {
 
   useEffect(() => {
     let data = [...cars];
-
     if (search) {
       data = data.filter(
         (c) =>
@@ -33,11 +31,9 @@ const Cars = () => {
           c.brand.toLowerCase().includes(search.toLowerCase())
       );
     }
-
     if (brand !== "All") data = data.filter((c) => c.brand === brand);
     if (fuel !== "All") data = data.filter((c) => c.fuelType === fuel);
-    if (appliedMaxPrice)
-      data = data.filter((c) => c.pricePerDay <= appliedMaxPrice);
+    if (appliedMaxPrice) data = data.filter((c) => c.pricePerDay <= appliedMaxPrice);
 
     setFilteredCars(data);
   }, [search, brand, fuel, appliedMaxPrice, cars]);
@@ -74,7 +70,6 @@ const Cars = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-
           <select
             className="border rounded-lg px-3 py-2"
             value={brand}
@@ -84,7 +79,6 @@ const Cars = () => {
               <option key={b}>{b}</option>
             ))}
           </select>
-
           <select
             className="border rounded-lg px-3 py-2"
             value={fuel}
@@ -94,7 +88,6 @@ const Cars = () => {
               <option key={f}>{f}</option>
             ))}
           </select>
-
           <input
             type="number"
             placeholder="₹ Max / Day"
@@ -102,7 +95,6 @@ const Cars = () => {
             value={maxPriceInput}
             onChange={(e) => setMaxPriceInput(e.target.value)}
           />
-
           <button
             onClick={() => setAppliedMaxPrice(maxPriceInput)}
             className="bg-black text-white rounded-lg px-4 py-2 hover:scale-105 transition"
@@ -114,46 +106,51 @@ const Cars = () => {
 
       {/* CAR GRID */}
       <div className="max-w-7xl mx-auto px-4 py-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {filteredCars.map((car) => (
-          <div
-            key={car._id}
-            className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition relative"
-          >
-            {/* Badge */}
-            <span className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 rounded-full">
-              Premium
-            </span>
+        {filteredCars.map((car) => {
+          const firstImage =
+            car.images && car.images.length > 0 ? car.images[0] : car.image;
 
-            <div className="overflow-hidden">
-              <img
-                src={car.image}
-                alt={car.name}
-                className="h-56 w-full object-cover group-hover:scale-110 transition duration-500"
-              />
-            </div>
+          return (
+            <div
+              key={car._id}
+              className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition relative"
+            >
+              {/* Badge */}
+              <span className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 rounded-full">
+                Premium
+              </span>
 
-            <div className="p-5">
-              <h2 className="text-xl font-bold">{car.name}</h2>
-              <p className="text-gray-500 text-sm">{car.brand}</p>
-
-              <div className="flex justify-between items-center mt-4 text-sm">
-                <span className="bg-gray-100 px-3 py-1 rounded-full">
-                  ⛽ {car.fuelType}
-                </span>
-                <span className="text-xl font-bold text-blue-600">
-                  ₹{car.pricePerDay}
-                </span>
+              {/* Image */}
+              <div className="overflow-hidden h-56 w-full">
+                <img
+                  src={`${firstImage}`}
+                  alt={car.name}
+                  className="h-full w-full object-cover group-hover:scale-110 transition duration-500"
+                />
               </div>
 
-              <Link
-                to={`/cars/${car._id}`}
-                className="mt-6 block text-center bg-gradient-to-r from-black to-gray-800 text-white py-3 rounded-xl hover:opacity-90"
-              >
-                View Details →
-              </Link>
+              {/* Car Info */}
+              <div className="p-5">
+                <h2 className="text-xl font-bold">{car.name}</h2>
+                <p className="text-gray-500 text-sm">{car.brand}</p>
+                <div className="flex justify-between items-center mt-4 text-sm">
+                  <span className="bg-gray-100 px-3 py-1 rounded-full">
+                    ⛽ {car.fuelType}
+                  </span>
+                  <span className="text-xl font-bold text-blue-600">
+                    ₹{car.pricePerDay.toLocaleString("en-IN")} / day
+                  </span>
+                </div>
+                <Link
+                  to={`/cars/${car._id}`}
+                  className="mt-6 block text-center bg-gradient-to-r from-black to-gray-800 text-white py-3 rounded-xl hover:opacity-90"
+                >
+                  View Details →
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

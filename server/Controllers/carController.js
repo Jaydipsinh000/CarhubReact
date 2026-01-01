@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Car from "../Models/Cars.js";
 
 // =======================
@@ -5,37 +6,21 @@ import Car from "../Models/Cars.js";
 // =======================
 export const addCar = async (req, res) => {
   try {
-    let {
-      name,
-      brand,
-      pricePerDay,
-      fuelType,
-      seats,
-      transmission,
-      images, // expecting array of image URLs
-    } = req.body;
+    const { name, brand, pricePerDay, fuelType, seats, transmission } = req.body;
 
-    // Ensure images is an array
-    if (!images || !Array.isArray(images) || images.length === 0) {
+    // ✅ FIX: save public URL, not file.path
+    const images = req.files?.map(
+      (file) => `/uploads/${file.filename}`
+    );
+
+    if (!images || images.length === 0) {
       return res.status(400).json({
         success: false,
         message: "At least one image is required",
       });
     }
 
-    // Main image is the first in array
-    const image = images[0];
-
-    // Validation
-    if (
-      !name ||
-      !brand ||
-      pricePerDay === undefined ||
-      !fuelType ||
-      seats === undefined ||
-      !transmission ||
-      !image
-    ) {
+    if (!name || !brand || !pricePerDay || !fuelType || !seats || !transmission) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -49,8 +34,9 @@ export const addCar = async (req, res) => {
       fuelType,
       seats,
       transmission,
-      image,   // main image
-      images,  // array of all images
+      image: images[0], // main image
+      images,
+      bookings: [],
     });
 
     res.status(201).json({
@@ -60,7 +46,6 @@ export const addCar = async (req, res) => {
     });
   } catch (error) {
     console.error("Add Car Error:", error);
-
     res.status(500).json({
       success: false,
       message: "Server error while adding Car",
@@ -74,18 +59,20 @@ export const addCar = async (req, res) => {
 export const updateCar = async (req, res) => {
   try {
     const { id } = req.params;
-    let { images } = req.body;
 
-    // If images provided, update main image as first one
-    if (images && Array.isArray(images) && images.length > 0) {
+    const images = req.files?.map(
+      (file) => `/uploads/${file.filename}`
+    );
+
+    if (images && images.length > 0) {
       req.body.image = images[0];
+      req.body.images = images;
     }
 
-    const updatedCar = await Car.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const updatedCar = await Car.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedCar) {
       return res.status(404).json({ message: "Car not found" });
@@ -98,7 +85,6 @@ export const updateCar = async (req, res) => {
     });
   } catch (error) {
     console.error("Update Car Error:", error.message);
-
     res.status(500).json({
       success: false,
       message: "Car update failed",
@@ -111,67 +97,31 @@ export const updateCar = async (req, res) => {
 // =======================
 export const deleteCar = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const deletedCar = await Car.findByIdAndDelete(id);
-
+    const deletedCar = await Car.findByIdAndDelete(req.params.id);
     if (!deletedCar) {
       return res.status(404).json({ message: "Car not found" });
     }
-
     res.status(200).json({ message: "Car deleted successfully" });
   } catch (error) {
-    console.error("Delete Car Error:", error.message);
     res.status(500).json({ message: "Car delete failed" });
   }
 };
 
 // =======================
-// GET ALL CARS (PUBLIC)
+// GET ALL CARS
 // =======================
 export const getAllCars = async (req, res) => {
-  try {
-    const cars = await Car.find().sort({ createdAt: -1 });
-
-    res.status(200).json({
-      success: true,
-      total: cars.length,
-      cars,
-    });
-  } catch (error) {
-    console.error("Get All Cars Error:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch cars",
-    });
-  }
+  const cars = await Car.find().sort({ createdAt: -1 });
+  res.json({ success: true, cars });
 };
 
 // =======================
-// GET SINGLE CAR BY ID
+// GET SINGLE CAR
 // =======================
 export const getCarById = async (req, res) => {
-  try {
-    const car = await Car.findById(req.params.id);
-
-    if (!car) {
-      return res.status(404).json({
-        success: false,
-        message: "Car not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      car,
-    });
-  } catch (error) {
-    console.error("Get Car Error:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Invalid car ID or server error",
-    });
+  const car = await Car.findById(req.params.id);
+  if (!car) {
+    return res.status(404).json({ message: "Car not found" });
   }
+  res.json({ success: true, car });
 };

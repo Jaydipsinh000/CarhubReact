@@ -7,6 +7,9 @@ nodemon -D
 bcrypt
 jsonwebtoken
 nodemailer
+multer
+csv-parser
+razorpay
 
 //Frontend
 react router dom
@@ -14,3 +17,4 @@ axios
 tailwindcss @tailwindcss/vite -D
 @reduxjs/toolkit 
 react-redux
+react-datepicker

@@ -35,7 +35,7 @@ const carSchema = new mongoose.Schema(
       required: true,
     },
 
-    image: {
+    images: {
       type: [String],
       required: true,
     },
@@ -45,6 +45,24 @@ const carSchema = new mongoose.Schema(
       default: true,
     },
 
+    // ✅ NEW: BOOKINGS FOR DATE AVAILABILITY
+   bookings: [
+  {
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Booking",
+    },
+  },
+],
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -53,4 +71,4 @@ const carSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Car", carSchema);
+export default mongoose.models.Car || mongoose.model("Car", carSchema);

@@ -37,6 +37,15 @@ const AdminSidebar = () => {
         >
           🚗 <span className="font-medium">Manage Cars</span>
         </Link>
+
+         <Link
+          to="/admin/cars/bulk"
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${isActive(
+            "/admin/cars/bulk"
+          )}`}
+        >
+          🚗 <span className="font-medium">Bulk Add Cars</span>
+        </Link>
       </nav>
 
       {/* FOOTER */}

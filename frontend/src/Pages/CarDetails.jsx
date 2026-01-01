@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchCarById, fetchCars } from "../Services/carApi";
-import { useDispatch } from "react-redux";
-import { addToCart } from "../store/cartslice";
-
+import { fetchCarById, fetchCars, checkAvailability } from "../Services/carApi";
 
 const CarDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [car, setCar] = useState(null);
   const [moreCars, setMoreCars] = useState([]);
@@ -16,6 +12,14 @@ const CarDetails = () => {
   const [tab, setTab] = useState("overview");
   const [imgIndex, setImgIndex] = useState(0);
 
+  // Booking states
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [totalDays, setTotalDays] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [availability, setAvailability] = useState(null);
+
+  // Load car data
   useEffect(() => {
     const load = async () => {
       try {
@@ -30,21 +34,47 @@ const CarDetails = () => {
     load();
   }, [id]);
 
-  // Add to cart handler
-  const handleAddToCart = () => {
-    const user = localStorage.getItem("user");
-    if(!user) {
-      alert("Please login to add items to cart");
-      navigate("/login");
+  // Calculate total days & price
+  useEffect(() => {
+    if (startDate && endDate && car) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = end - start;
+      const days = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      if (days > 0) {
+        setTotalDays(days);
+        setTotalPrice(days * car.pricePerDay);
+      } else {
+        setTotalDays(0);
+        setTotalPrice(0);
+      }
+    }
+  }, [startDate, endDate, car]);
+
+  // Check availability
+  const handleCheckAvailability = async () => {
+    if (!startDate || !endDate) {
+      alert("Please select start and end dates");
       return;
     }
-    dispatch(addToCart({
-      id: car._id,
-      name: car.name,
-      pricePerDay: car.pricePerDay,
-      image: car.image,
-    })
-   );
+    try {
+      const res = await checkAvailability({
+        carId: car._id,
+        startDate,
+        endDate,
+      });
+      if (!res.data.available) {
+        setAvailability(false);
+        alert("❌ Car not available for selected dates");
+      } else {
+        setAvailability(true);
+        alert("✅ Car is available, proceed to book");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error checking availability");
+    }
   };
 
   if (loading) {
@@ -53,7 +83,7 @@ const CarDetails = () => {
         <span className="animate-spin h-10 w-10 border-b-2 border-black rounded-full"></span>
       </div>
     );
-  };
+  }
 
   if (!car) return <p className="text-center mt-20">Car not found</p>;
 
@@ -69,19 +99,17 @@ const CarDetails = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* ===== HERO SECTION ===== */}
+      {/* HERO */}
       <div className="max-w-7xl mx-auto px-4 pt-10">
         <div className="grid lg:grid-cols-2 gap-10">
-          
-          {/* ===== HERO IMAGE GALLERY ===== */}
-          <div className="w-full">
-            {/* MAIN IMAGE */}
-            <div className="relative w-full overflow-hidden rounded-3xl shadow-xl bg-black">
-              <div className="aspect-[16/9] sm:aspect-[4/3] lg:aspect-[16/9]">
+          {/* IMAGE */}
+          <div>
+            <div className="relative overflow-hidden rounded-3xl shadow-xl bg-black">
+              <div className="aspect-[16/9]">
                 <img
                   src={images[imgIndex]}
                   alt={car.name}
-                  className="w-full h-full object-contain sm:object-cover transition-all duration-500"
+                  className="w-full h-full object-contain sm:object-cover"
                 />
               </div>
 
@@ -93,37 +121,34 @@ const CarDetails = () => {
                         imgIndex === 0 ? images.length - 1 : imgIndex - 1
                       )
                     }
-                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow"
+                    className="absolute left-3 top-1/2 bg-white p-2 rounded-full"
                   >
                     ❮
                   </button>
-
                   <button
                     onClick={() =>
                       setImgIndex(
                         imgIndex === images.length - 1 ? 0 : imgIndex + 1
                       )
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow"
+                    className="absolute right-3 top-1/2 bg-white p-2 rounded-full"
                   >
                     ❯
                   </button>
                 </>
               )}
 
-              {/* Image Counter */}
               <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
                 {imgIndex + 1} / {images.length}
               </div>
             </div>
 
-            {/* THUMBNAILS */}
             {images.length > 1 && (
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {images.map((img, i) => (
                   <img
                     key={i}
-                    src={img}
+                    src={images[imgIndex]}
                     onClick={() => setImgIndex(i)}
                     className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${
                       imgIndex === i
@@ -136,20 +161,16 @@ const CarDetails = () => {
             )}
           </div>
 
-          {/* Info */}
+          {/* INFO */}
           <div className="space-y-6">
             <h1 className="text-4xl font-extrabold">{car.name}</h1>
             <p className="text-gray-500 text-lg">{car.brand}</p>
-
-            {/* Quick Specs */}
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <span>🚗 Seats: {car.seats || 5}</span>
-              <span>⚙️ {car.transmission || "Automatic"}</span>
+              <span>🚗 Seats: {car.seats}</span>
+              <span>⚙️ {car.transmission}</span>
               <span>⛽ {car.fuelType}</span>
               <span>🛡 Insurance Included</span>
             </div>
-
-            {/* Trust badges */}
             <div className="flex gap-4 text-sm text-gray-600">
               <span>✔ Free Cancellation</span>
               <span>✔ 24x7 Support</span>
@@ -159,9 +180,9 @@ const CarDetails = () => {
         </div>
       </div>
 
-      {/* ===== CONTENT + BOOKING ===== */}
+      {/* CONTENT + BOOKING */}
       <div className="max-w-7xl mx-auto px-4 py-14 grid lg:grid-cols-3 gap-10">
-        {/* LEFT CONTENT */}
+        {/* LEFT */}
         <div className="lg:col-span-2 space-y-8">
           {/* Tabs */}
           <div className="flex gap-6 border-b">
@@ -183,7 +204,7 @@ const CarDetails = () => {
           {tab === "overview" && (
             <p className="text-gray-700 leading-relaxed">
               {car.description ||
-                "Experience luxury, comfort and performance with this premium rental car. Perfect for city rides and long journeys."}
+                "Experience luxury, comfort and performance with this premium rental car."}
             </p>
           )}
 
@@ -192,7 +213,7 @@ const CarDetails = () => {
               <div>🚗 Seats: {car.seats}</div>
               <div>⚙️ Transmission: {car.transmission}</div>
               <div>⛽ Fuel: {car.fuelType}</div>
-              <div>💰 ₹{car.pricePerDay} / day</div>
+              <div>💰 ₹{car.pricePerDay.toLocaleString("en-IN")} / day</div>
             </div>
           )}
 
@@ -227,25 +248,23 @@ const CarDetails = () => {
         <div className="sticky top-24 h-fit">
           <div className="bg-white rounded-3xl shadow-xl p-6 space-y-6">
             <div className="text-center">
-              <p className="text-gray-500">Starting From</p>
+              <p className="text-gray-500">Price per day</p>
               <p className="text-4xl font-extrabold text-green-600">
-                ₹{car.pricePerDay}
+                ₹{car.pricePerDay.toLocaleString("en-IN")}
               </p>
-              <p className="text-sm text-gray-500">per day</p>
             </div>
 
-            <button className="w-full bg-black text-white py-3 rounded-xl text-lg hover:opacity-90">
+            <button
+              onClick={() => navigate(`/book/${car._id}`)}
+              className="w-full bg-black text-white py-4 rounded-xl text-lg font-semibold hover:bg-gray-900 transition"
+            >
               Book Now
-            </button>
-
-            <button onClick={() => navigate("/contact")} className="w-full border py-3 rounded-xl">
-              Contact Support
             </button>
           </div>
         </div>
       </div>
 
-      {/* ===== MORE CARS ===== */}
+      {/* MORE CARS */}
       {moreCars.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 pb-20">
           <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
@@ -259,12 +278,13 @@ const CarDetails = () => {
                 <img
                   src={c.image}
                   className="h-40 w-full object-cover rounded-t-xl"
+                  alt={c.name}
                 />
                 <div className="p-4">
                   <h3 className="font-semibold">{c.name}</h3>
                   <p className="text-gray-500 text-sm">{c.brand}</p>
                   <p className="font-bold text-green-600">
-                    ₹{c.pricePerDay}/day
+                    ₹{c.pricePerDay.toLocaleString("en-IN")}/day
                   </p>
                 </div>
               </div>
