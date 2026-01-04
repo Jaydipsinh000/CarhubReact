@@ -36,8 +36,18 @@ const MyBookings = () => {
 
     if (img.startsWith("http")) return img;
 
+    // Normalize path: replace backslashes, remove leading slashes
+    let cleanPath = img.replace(/\\/g, "/");
+    while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
+
+    // Ensure it starts with uploads/
+    if (!cleanPath.startsWith("uploads/")) {
+      cleanPath = `uploads/${cleanPath}`;
+    }
+
     const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-    return `${baseUrl}${img}`;
+    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    return `${normalizedBase}/${cleanPath}`;
   };
 
   if (loading)

@@ -127,8 +127,19 @@ const AdminCars = () => {
                                   const img = car.images && car.images[0];
                                   if (!img || typeof img !== 'string') return "https://via.placeholder.com/400x300?text=No+Image";
                                   if (img.startsWith("http")) return img;
+
+                                  // Normalize path: replace backslashes, remove leading slashes
+                                  let cleanPath = img.replace(/\\/g, "/");
+                                  while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
+
+                                  // Ensure it starts with uploads/
+                                  if (!cleanPath.startsWith("uploads/")) {
+                                    cleanPath = `uploads/${cleanPath}`;
+                                  }
+
                                   const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-                                  return `${baseUrl}${img}`;
+                                  const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+                                  return `${normalizedBase}/${cleanPath}`;
                                 })()}
                                 alt={car.name}
                                 className="w-full h-full object-cover"

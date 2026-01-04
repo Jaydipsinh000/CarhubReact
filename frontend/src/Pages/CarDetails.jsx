@@ -94,9 +94,18 @@ const CarDetails = () => {
     }
     if (imagePath.startsWith("http")) return imagePath;
 
-    // Use env variable with hardcoded fallback for Render
+    // Normalize path: replace backslashes, remove leading slashes
+    let cleanPath = imagePath.replace(/\\/g, "/");
+    while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
+
+    // Ensure it starts with uploads/
+    if (!cleanPath.startsWith("uploads/")) {
+      cleanPath = `uploads/${cleanPath}`;
+    }
+
     const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-    return `${baseUrl}${imagePath}`;
+    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    return `${normalizedBase}/${cleanPath}`;
   };
 
   const images = car.images?.length ? car.images : [car.image];
@@ -163,8 +172,8 @@ const CarDetails = () => {
                     src={images[imgIndex]}
                     onClick={() => setImgIndex(i)}
                     className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${imgIndex === i
-                        ? "border-blue-600 scale-105"
-                        : "border-transparent hover:border-gray-300"
+                      ? "border-blue-600 scale-105"
+                      : "border-transparent hover:border-gray-300"
                       }`}
                   />
                 ))}
@@ -202,8 +211,8 @@ const CarDetails = () => {
                 key={t}
                 onClick={() => setTab(t)}
                 className={`pb-3 font-semibold ${tab === t
-                    ? "border-b-2 border-black text-black"
-                    : "text-gray-500"
+                  ? "border-b-2 border-black text-black"
+                  : "text-gray-500"
                   }`}
               >
                 {t.toUpperCase()}
