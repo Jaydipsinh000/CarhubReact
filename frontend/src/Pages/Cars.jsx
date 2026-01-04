@@ -194,7 +194,7 @@ const Cars = () => {
                 {/* IMAGE AREA */}
                 <div className="relative h-64 overflow-hidden bg-gray-100">
                   <img
-                    src={c.image}
+                    src={getCarImage(images[imgIndex])}
                     alt={car.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
