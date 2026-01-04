@@ -87,6 +87,18 @@ const CarDetails = () => {
 
   if (!car) return <p className="text-center mt-20">Car not found</p>;
 
+  // Helper for safe image resolution
+  const getCarImage = (imagePath) => {
+    if (!imagePath || typeof imagePath !== 'string') {
+      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
+    }
+    if (imagePath.startsWith("http")) return imagePath;
+
+    // Use env variable with hardcoded fallback for Render
+    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
+    return `${baseUrl}${imagePath}`;
+  };
+
   const images = car.images?.length ? car.images : [car.image];
   const features = car.features || [
     "GPS Navigation",
@@ -107,7 +119,7 @@ const CarDetails = () => {
             <div className="relative overflow-hidden rounded-3xl shadow-xl bg-black">
               <div className="aspect-[16/9]">
                 <img
-                  src={images[imgIndex]}
+                  src={getCarImage(images[imgIndex])}
                   alt={car.name}
                   className="w-full h-full object-contain sm:object-cover"
                 />
@@ -150,11 +162,10 @@ const CarDetails = () => {
                     key={i}
                     src={images[imgIndex]}
                     onClick={() => setImgIndex(i)}
-                    className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${
-                      imgIndex === i
+                    className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${imgIndex === i
                         ? "border-blue-600 scale-105"
                         : "border-transparent hover:border-gray-300"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -190,11 +201,10 @@ const CarDetails = () => {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`pb-3 font-semibold ${
-                  tab === t
+                className={`pb-3 font-semibold ${tab === t
                     ? "border-b-2 border-black text-black"
                     : "text-gray-500"
-                }`}
+                  }`}
               >
                 {t.toUpperCase()}
               </button>

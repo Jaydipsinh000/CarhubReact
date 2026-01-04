@@ -22,6 +22,24 @@ const MyBookings = () => {
     fetchBookings();
   }, []);
 
+  // Helper for safe image resolution
+  const getCarImage = (booking) => {
+    if (!booking || !booking.carId) return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
+
+    let img = booking.carId.image;
+    if (Array.isArray(img) && img.length > 0) img = img[0];
+    if (!img && booking.carId.images && booking.carId.images.length > 0) img = booking.carId.images[0];
+
+    if (!img || typeof img !== 'string') {
+      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
+    }
+
+    if (img.startsWith("http")) return img;
+
+    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
+    return `${baseUrl}${img}`;
+  };
+
   if (loading)
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">

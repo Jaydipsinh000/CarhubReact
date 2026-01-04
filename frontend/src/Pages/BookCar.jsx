@@ -266,7 +266,10 @@ const BookCar = () => {
 
                   if (!img || typeof img !== 'string') return "https://via.placeholder.com/400x300?text=No+Image";
 
-                  return img.startsWith("http") ? img : `${import.meta.env.VITE_IMAGE_BASE_URL}${img}`;
+                  if (img.startsWith("http")) return img;
+
+                  const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
+                  return `${baseUrl}${img}`;
                 })()}
                 alt={car.name}
                 className="w-full h-full object-cover"

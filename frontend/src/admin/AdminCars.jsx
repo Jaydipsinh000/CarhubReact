@@ -123,11 +123,13 @@ const AdminCars = () => {
                           <div className="w-16 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                             {car.images && car.images[0] ? (
                               <img
-                                src={
-                                  car.images[0]?.startsWith("http")
-                                    ? car.images[0]
-                                    : `${import.meta.env.VITE_IMAGE_BASE_URL}${car.images[0]}`
-                                }
+                                src={(() => {
+                                  const img = car.images && car.images[0];
+                                  if (!img || typeof img !== 'string') return "https://via.placeholder.com/400x300?text=No+Image";
+                                  if (img.startsWith("http")) return img;
+                                  const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
+                                  return `${baseUrl}${img}`;
+                                })()}
                                 alt={car.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => e.target.style.display = 'none'}

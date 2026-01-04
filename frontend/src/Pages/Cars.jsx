@@ -63,7 +63,11 @@ const Cars = () => {
     }
 
     // Check if absolute URL (http/https)
-    return img.startsWith("http") ? img : `${import.meta.env.VITE_IMAGE_BASE_URL}${img}`;
+    if (img.startsWith("http")) return img;
+
+    // Use env variable with hardcoded fallback for Render
+    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
+    return `${baseUrl}${img}`;
   };
 
   const handleBookNow = (carId) => {
