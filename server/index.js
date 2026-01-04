@@ -26,6 +26,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
+  "https://carent-nu.vercel.app", // Verified Vercel URL
   process.env.FRONTEND_URL // Allow production frontend
 ].filter(Boolean);
 

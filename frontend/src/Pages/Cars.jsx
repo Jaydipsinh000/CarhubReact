@@ -50,13 +50,17 @@ const Cars = () => {
   const brands = ["All", ...new Set(cars.map((c) => c.brand))];
   const fuels = ["All", ...new Set(cars.map((c) => c.fuelType))];
 
-  // Helper for safe image resolution (Same as MyBookings)
+  // Helper for safe image resolution
   const getCarImage = (car) => {
-    if (!car || (!car.image && (!car.images || car.images.length === 0))) {
+    let img = car.image;
+    // Handle array case for 'image' field
+    if (Array.isArray(img) && img.length > 0) img = img[0];
+    // Fallback to 'images' array
+    if (!img && car.images && car.images.length > 0) img = car.images[0];
+
+    if (!img || typeof img !== 'string') {
       return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
     }
-    const img = car.image || car.images[0];
-    if (typeof img !== 'string') return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
 
     // Check if absolute URL (http/https)
     return img.startsWith("http") ? img : `${import.meta.env.VITE_IMAGE_BASE_URL}${img}`;
