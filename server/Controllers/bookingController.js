@@ -22,6 +22,7 @@ export const createBooking = async (req, res) => {
 
     const booking = await Booking.create({
       carId,
+      user: req.user._id || req.user.id, // Ensure user ID is saved
       startDate,
       endDate,
       amount,
@@ -50,5 +51,17 @@ export const createBooking = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Booking failed" });
+  }
+};
+
+export const getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ user: req.user.id })
+      .populate("carId") // Correctly populate carId
+      .sort({ createdAt: -1 });
+
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch bookings" });
   }
 };

@@ -137,3 +137,58 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Login failed" });
   }
 };
+// =======================
+// GOOGLE LOGIN (UPSERT)
+// =======================
+export const googleLogin = async (req, res) => {
+  try {
+    const { name, email, googleId, photo } = req.body;
+
+    // 1. Check if user exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // If user exists, ensure googleId is set (link account)
+      if (!user.googleId) {
+        user.googleId = googleId;
+        // Optionally update verified status if trusting google
+        user.isVerified = true;
+        await user.save();
+      }
+    } else {
+      // 2. If user doesn't exist, create new user
+      // Generate random password as fallback
+      const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        googleId,
+        isVerified: true, // Google emails are verified
+        role: "user" // Default role
+      });
+    }
+
+    // 3. Generate Token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    // 4. Return Response
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        photo: photo
+      }
+    });
+
+  } catch (error) {
+    console.error("Google Login Error:", error);
+    res.status(500).json({ success: false, message: "Google Login failed" });
+  }
+};

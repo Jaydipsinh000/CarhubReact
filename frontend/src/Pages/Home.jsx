@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const token =localStorage.getItem("token");
+const token = localStorage.getItem("token");
 const Home = () => {
   return (
     <div className="w-full">

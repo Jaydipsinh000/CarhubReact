@@ -18,3 +18,4 @@ tailwindcss @tailwindcss/vite -D
 @reduxjs/toolkit 
 react-redux
 react-datepicker
+recharts

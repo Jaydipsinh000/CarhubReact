@@ -44,6 +44,14 @@ const UserSchema = new mongoose.Schema(
     otpExpires: {
       type: Date,
     },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows null/undefined to not clash uniqueness
+    },
+    photo: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

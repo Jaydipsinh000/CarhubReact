@@ -8,6 +8,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import bookingRoutes from "./Routes/bookingRoutes.js";
 import paymentRoutes from "./Routes/paymentRoutes.js";
+import adminRoutes from "./Routes/adminRoutes.js";
+
+
 
 dotenv.config();
 
@@ -22,7 +25,9 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // ✅ Only Localhost allowed
 const allowedOrigins = [
   "http://localhost:5173",
-];
+  "http://localhost:5174",
+  process.env.FRONTEND_URL // Allow production frontend
+].filter(Boolean);
 
 // CORS
 app.use(
@@ -47,6 +52,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/admin", adminRoutes);
+
 // Port
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

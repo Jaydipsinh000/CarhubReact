@@ -8,4 +8,3 @@ export const fetchCarById = (id) => api.get(`/cars/${id}`);
 
 export const checkAvailability = (data) =>
   api.post("/cars/check-availability", data);
-

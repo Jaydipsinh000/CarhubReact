@@ -24,6 +24,7 @@ import ProtectedRoute from "./Route/ProtectedRoute.jsx";
 import AdminUpdateCar from "./admin/AdminUpdate.jsx";
 import BookCar from "./Pages/BookCar.jsx";
 import AdminBulkAddCars from "./admin/AdminBulkAddCars.jsx";
+import MyBookings from "./Pages/MyBookings.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -57,6 +58,7 @@ const App = () => {
         <Route path="/verify-otp" element={<VerifyOtp setUser={setUser} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/book/:id" element={<BookCar />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
 
         {/* ===== ADMIN ROUTES ===== */}
         <Route
