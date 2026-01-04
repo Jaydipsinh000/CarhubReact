@@ -8,6 +8,9 @@ const sendOtpMail = async (req, res, next) => {
 
     const { email, otp, type } = req.otpData;
 
+    // ✅ EMERGENCY LOG: If email fails on Render, user can see OTP in Render Dashboard logs
+    console.log(`[MAILER] 📧 Attempting to send OTP [${otp}] to [${email}]...`);
+
     const subject =
       type === "resend" ? "Carent | Resend OTP" : "Carent | OTP Verification";
 
@@ -112,7 +115,7 @@ const sendOtpMail = async (req, res, next) => {
     console.error("❌ Send OTP Mail Error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Email sending failed" });
+      .json({ success: false, message: "Email sending failed", error: error.message });
   }
 };
 

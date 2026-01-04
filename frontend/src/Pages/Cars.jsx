@@ -51,24 +51,28 @@ const Cars = () => {
   const fuels = ["All", ...new Set(cars.map((c) => c.fuelType))];
 
   // Helper for safe image resolution
-  const getCarImage = (car) => {
-    let img = car.image;
-    // Handle array case for 'image' field
-    if (Array.isArray(img) && img.length > 0) img = img[0];
-    // Fallback to 'images' array
-    if (!img && car.images && car.images.length > 0) img = car.images[0];
+ const getCarImage = (car) => {
+  let img = car.image;
 
-    if (!img || typeof img !== 'string') {
-      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
-    }
+  if (Array.isArray(img) && img.length > 0) img = img[0];
+  if (!img && car.images && car.images.length > 0) img = car.images[0];
 
-    // Check if absolute URL (http/https)
-    if (img.startsWith("http")) return img;
+  if (!img || typeof img !== "string") {
+    return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
+  }
 
-    // Use env variable with hardcoded fallback for Render
-    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-    return `${baseUrl}${img}`;
-  };
+  // already absolute
+  if (img.startsWith("http")) return img;
+
+  // 🔥 FIX: ensure correct uploads path
+  if (!img.startsWith("/uploads")) {
+    img = `/uploads/${img}`;
+  }
+
+  const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
+  return `${baseUrl}${img}`;
+};
+
 
   const handleBookNow = (carId) => {
     const token = localStorage.getItem("token");
@@ -190,7 +194,7 @@ const Cars = () => {
                 {/* IMAGE AREA */}
                 <div className="relative h-64 overflow-hidden bg-gray-100">
                   <img
-                    src={getCarImage(car)}
+                    src={c.image}
                     alt={car.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
