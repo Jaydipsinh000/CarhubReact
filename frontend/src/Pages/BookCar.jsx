@@ -138,7 +138,7 @@ const BookCar = () => {
       }
 
       // 1. Create Booking Entry
-      const res = await axios.post(
+      const bookingRes = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/bookings/book`,
         {
           carId: car._id,
