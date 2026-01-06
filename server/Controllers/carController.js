@@ -8,10 +8,7 @@ export const addCar = async (req, res) => {
   try {
     const { name, brand, pricePerDay, fuelType, seats, transmission } = req.body;
 
-    // ✅ FIX: save public URL, not file.path
-    const images = req.files?.map(
-      (file) => `/uploads/${file.filename}`
-    );
+    const images = req.files?.map((file) => `/uploads/${file.filename}`);
 
     if (!images || images.length === 0) {
       return res.status(400).json({
@@ -34,7 +31,6 @@ export const addCar = async (req, res) => {
       fuelType,
       seats,
       transmission,
-      image: images[0], // main image
       images,
       bookings: [],
     });
@@ -60,13 +56,8 @@ export const updateCar = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const images = req.files?.map(
-      (file) => `/uploads/${file.filename}`
-    );
-
-    if (images && images.length > 0) {
-      req.body.image = images[0];
-      req.body.images = images;
+    if (req.files && req.files.length > 0) {
+      req.body.images = req.files.map((file) => `/uploads/${file.filename}`);
     }
 
     const updatedCar = await Car.findByIdAndUpdate(id, req.body, {
@@ -91,6 +82,7 @@ export const updateCar = async (req, res) => {
     });
   }
 };
+
 
 // =======================
 // DELETE CAR

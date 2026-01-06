@@ -10,6 +10,8 @@ import { protect, adminOnly } from "../Middleware/authAdmin.js";
 import multer from "multer";
 import fs from "fs";
 import Car from "../Models/Cars.js";
+import path from "path";
+
 
 const router = express.Router();
 
@@ -17,11 +19,27 @@ const router = express.Router();
 if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 
 // Multer setup
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, file.originalname),
+  filename: (req, file, cb) => {
+    const uniqueName =
+      Date.now() + "-" + Math.round(Math.random() * 1e9) + path.extname(file.originalname);
+    cb(null, uniqueName);
+  },
 });
-const upload = multer({ storage });
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files allowed"));
+    }
+    cb(null, true);
+  },
+});
+
 
 // PUBLIC ROUTES
 router.get("/", getAllCars);

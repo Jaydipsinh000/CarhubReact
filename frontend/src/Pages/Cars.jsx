@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchCars } from "../Services/carApi";
-import { Search, Filter, Fuel, Settings, Zap, ArrowRight, Car as CarIcon, AlertCircle } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Fuel,
+  Settings,
+  Zap,
+  ArrowRight,
+  Car as CarIcon,
+  AlertCircle,
+} from "lucide-react";
 import AuthModal from "../Components/AuthModal";
 
 const Cars = () => {
@@ -9,7 +18,7 @@ const Cars = () => {
   const [filteredCars, setFilteredCars] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
+  // filters
   const [search, setSearch] = useState("");
   const [brand, setBrand] = useState("All");
   const [fuel, setFuel] = useState("All");
@@ -17,6 +26,7 @@ const Cars = () => {
   const [appliedMaxPrice, setAppliedMaxPrice] = useState(null);
 
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false); // mobile
 
   const navigate = useNavigate();
 
@@ -30,9 +40,10 @@ const Cars = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter Logic
+  // filter logic
   useEffect(() => {
     let data = [...cars];
+
     if (search) {
       data = data.filter(
         (c) =>
@@ -40,9 +51,11 @@ const Cars = () => {
           c.brand.toLowerCase().includes(search.toLowerCase())
       );
     }
+
     if (brand !== "All") data = data.filter((c) => c.brand === brand);
     if (fuel !== "All") data = data.filter((c) => c.fuelType === fuel);
-    if (appliedMaxPrice) data = data.filter((c) => c.pricePerDay <= appliedMaxPrice);
+    if (appliedMaxPrice)
+      data = data.filter((c) => c.pricePerDay <= appliedMaxPrice);
 
     setFilteredCars(data);
   }, [search, brand, fuel, appliedMaxPrice, cars]);
@@ -50,131 +63,206 @@ const Cars = () => {
   const brands = ["All", ...new Set(cars.map((c) => c.brand))];
   const fuels = ["All", ...new Set(cars.map((c) => c.fuelType))];
 
-  // Helper for safe image resolution
   const getCarImage = (car) => {
     let img = car.image;
-    if (Array.isArray(img) && img.length > 0) img = img[0];
-    if (!img && car.images && car.images.length > 0) img = car.images[0];
+    if (Array.isArray(img)) img = img[0];
+    if (!img && car.images?.length) img = car.images[0];
 
     if (!img || typeof img !== "string") {
-      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
+      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf";
     }
 
     if (img.startsWith("http")) return img;
 
-    // Normalize path: replace backslashes, remove leading slashes
-    let cleanPath = img.replace(/\\/g, "/");
-    while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
+    const cleanPath = img.replace(/\\/g, "/").replace(/^\/+/, "");
+    const base =
+      import.meta.env.VITE_IMAGE_BASE_URL ||
+      "https://carent-qdwb.onrender.com";
 
-    // Ensure it starts with uploads/
-    if (!cleanPath.startsWith("uploads/")) {
-      cleanPath = `uploads/${cleanPath}`;
-    }
-
-    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    return `${normalizedBase}/${cleanPath}`;
+    return `${base.replace(/\/$/, "")}/uploads/${cleanPath}`;
   };
 
-
-  const handleBookNow = (carId) => {
+  const handleBookNow = (id) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      setShowAuthModal(true);
-      return;
-    }
-    navigate(`/cars/${carId}`);
+    if (!token) return setShowAuthModal(true);
+    navigate(`/cars/${id}`);
   };
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
-        <div className="animate-spin h-12 w-12 border-4 border-black border-t-transparent rounded-full mb-4" />
-        <p className="text-gray-500 font-medium">Loading premium fleet...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin h-12 w-12 border-4 border-black border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
 
-      {/* HERO SECTION */}
-      <div className="relative bg-black text-white py-24 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-blue-900/20 blur-3xl opacity-50" />
-        <div className="relative max-w-7xl mx-auto text-center space-y-4">
-          <h1 className="text-5xl md:text-6xl font-bold font-display tracking-tight">
-            Find Your <span className="text-blue-500">Perfect Drive</span>
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Experience the thrill of the road with our curated collection of premium and luxury vehicles.
-          </p>
-        </div>
+      {/* HERO */}
+      <div className="relative bg-black text-white py-24 text-center">
+        <h1 className="text-5xl font-bold">
+          Find Your <span className="text-blue-500">Perfect Drive</span>
+        </h1>
+        <p className="text-gray-400 mt-4">
+          Premium & luxury cars at best price
+        </p>
       </div>
 
-      {/* STICKY FILTER BAR */}
-      <div className="sticky top-16 z-30 px-4 -mt-8">
-        <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-xl rounded-2xl p-4 md:p-6 transition-all">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+      {/* MOBILE FILTER BUTTON */}
+      <div className="md:hidden sticky top-16 z-30 px-4 -mt-8">
+        <button
+          onClick={() => setShowFilters(true)}
+          className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl shadow-xl"
+        >
+          <Filter size={18} />
+          Filters
+        </button>
+      </div>
 
-            {/* SEARCH */}
-            <div className="md:col-span-4 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+      {/* DESKTOP FILTER BAR (UNCHANGED DESIGN) */}
+      <div className="hidden md:block sticky top-16 z-30 px-4 -mt-8">
+        <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-xl border shadow-xl rounded-2xl p-5">
+          <div className="grid grid-cols-12 gap-4">
+
+            <div className="col-span-4 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border rounded-xl"
                 placeholder="Search by name or brand..."
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
 
-            {/* BRAND */}
-            <div className="md:col-span-2 relative">
-              <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <div className="col-span-2 relative">
+              <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <select
-                className="w-full pl-11 pr-8 py-3 bg-gray-50 border border-gray-200 rounded-xl appearance-none focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer"
+                className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl appearance-none"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
               >
-                {brands.map(b => <option key={b} value={b}>{b}</option>)}
+                {brands.map((b) => (
+                  <option key={b}>{b}</option>
+                ))}
               </select>
             </div>
 
-            {/* FUEL */}
-            <div className="md:col-span-2 relative">
-              <Fuel className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <div className="col-span-2 relative">
+              <Fuel className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <select
-                className="w-full pl-11 pr-8 py-3 bg-gray-50 border border-gray-200 rounded-xl appearance-none focus:ring-2 focus:ring-blue-500/20 outline-none cursor-pointer"
+                className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl appearance-none"
                 value={fuel}
                 onChange={(e) => setFuel(e.target.value)}
               >
-                {fuels.map(f => <option key={f} value={f}>{f}</option>)}
+                {fuels.map((f) => (
+                  <option key={f}>{f}</option>
+                ))}
               </select>
             </div>
 
-            {/* PRICE */}
-            <div className="md:col-span-4 flex gap-2">
-              <div className="relative flex-1">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₹</span>
+            <div className="col-span-2 relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                ₹
+              </span>
+              <input
+                type="number"
+                placeholder="Max Price"
+                className="w-full pl-8 pr-4 py-3 bg-gray-50 border rounded-xl"
+                value={maxPriceInput}
+                onChange={(e) => setMaxPriceInput(e.target.value)}
+              />
+            </div>
+
+            <button
+              onClick={() => setAppliedMaxPrice(maxPriceInput)}
+              className="col-span-2 bg-black text-white rounded-xl flex items-center justify-center gap-2"
+            >
+              Apply <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MOBILE FILTER MODAL – SAME UI */}
+      {showFilters && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end">
+          <div className="w-full bg-white/90 backdrop-blur-xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <Filter size={18} /> Filters
+              </h3>
+              <button onClick={() => setShowFilters(false)}>✕</button>
+            </div>
+
+            {/* SAME FILTER CONTENT */}
+            <div className="grid gap-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border rounded-xl"
+                  placeholder="Search by name or brand..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+
+              <div className="relative">
+                <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <select
+                  className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                >
+                  {brands.map((b) => (
+                    <option key={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <Fuel className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <select
+                  className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl"
+                  value={fuel}
+                  onChange={(e) => setFuel(e.target.value)}
+                >
+                  {fuels.map((f) => (
+                    <option key={f}>{f}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  ₹
+                </span>
                 <input
                   type="number"
                   placeholder="Max Price"
-                  className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none"
+                  className="w-full pl-8 pr-4 py-3 bg-gray-50 border rounded-xl"
                   value={maxPriceInput}
                   onChange={(e) => setMaxPriceInput(e.target.value)}
                 />
               </div>
+
               <button
-                onClick={() => setAppliedMaxPrice(maxPriceInput)}
-                className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition shadow-lg shadow-gray-200"
+                onClick={() => {
+                  setAppliedMaxPrice(maxPriceInput);
+                  setShowFilters(false);
+                }}
+                className="w-full bg-black text-white py-3 rounded-xl flex items-center justify-center gap-2"
               >
-                Filter
+                Apply Filters <ArrowRight size={18} />
               </button>
             </div>
-
           </div>
         </div>
-      </div>
+      )}
 
       {/* CAR GRID */}
       <div className="max-w-7xl mx-auto px-4 py-16">
@@ -197,7 +285,7 @@ const Cars = () => {
                 {/* IMAGE AREA */}
                 <div className="relative h-64 overflow-hidden bg-gray-100">
                   <img
-                    src={getCarImage(car)}
+                    src={car.image}
                     alt={car.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
@@ -247,5 +335,4 @@ const Cars = () => {
     </div>
   );
 };
-
 export default Cars;

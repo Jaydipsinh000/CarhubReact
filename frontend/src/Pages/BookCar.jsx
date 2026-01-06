@@ -160,7 +160,7 @@ const BookCar = () => {
 
       // 3. Initialize Razorpay
       const options = {
-        key: "rzp_test_RyyFCgFi2CxzuM",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderRes.data.amount,
         currency: "INR",
         name: "Carent Premium",
