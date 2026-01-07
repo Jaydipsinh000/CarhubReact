@@ -25,6 +25,9 @@ import AdminUpdateCar from "./admin/AdminUpdate.jsx";
 import BookCar from "./Pages/BookCar.jsx";
 import AdminBulkAddCars from "./admin/AdminBulkAddCars.jsx";
 import MyBookings from "./Pages/MyBookings.jsx";
+import AdminUsers from "./admin/AdminUsers.jsx";
+import AdminBookings from "./admin/AdminBookings.jsx";
+import AdminPayments from "./admin/AdminPayments.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -110,6 +113,37 @@ const App = () => {
             <AdminRoute>
               <ProtectedRoute>
                 <AdminBulkAddCars />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <AdminUsers />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        />
+          <Route
+          path="/admin/bookings"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <AdminBookings />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        />
+          <Route
+          path="/admin/payments"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <AdminPayments />
               </ProtectedRoute>
             </AdminRoute>
           }

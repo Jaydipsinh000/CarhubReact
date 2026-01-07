@@ -88,13 +88,17 @@ const Cars = () => {
     navigate(`/cars/${id}`);
   };
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin h-12 w-12 border-4 border-black border-t-transparent rounded-full" />
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+          <p className="text-gray-500 font-medium animate-pulse">Loading premium fleet...</p>
+        </div>
       </div>
     );
-  }
+
+
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">

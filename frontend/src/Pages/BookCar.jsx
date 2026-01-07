@@ -260,7 +260,7 @@ const BookCar = () => {
             <div className="relative h-48">
               <img
                 src={(() => {
-                  let img = car.image;
+                  let img = import.meta.env.VITE_IMAGE_BASE_URL ? car.images?.find(i => i.includes(import.meta.env.VITE_IMAGE_BASE_URL)) : null;
                   if (Array.isArray(img) && img.length > 0) img = img[0];
                   if (!img && car.images?.length > 0) img = car.images[0];
 

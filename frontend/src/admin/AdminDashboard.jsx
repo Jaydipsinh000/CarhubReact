@@ -13,7 +13,7 @@ import {
   Cell,
   CartesianGrid
 } from "recharts";
-import { Car, AlertCircle, Package, Users, TrendingUp, Calendar, ArrowUpRight, DollarSign } from "lucide-react";
+import { Car, AlertCircle, Package, Users, TrendingUp, Calendar, ArrowUpRight, RupeeIcon } from "lucide-react";
 
 const COLORS = ["#10b981", "#ef4444"];
 
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
       title: "Total Revenue",
       value: `₹${(data.monthlyStats?.reduce((acc, curr) => acc + curr.revenue, 0) || 0).toLocaleString()}`,
       desc: "Last 6 months",
-      icon: DollarSign,
+      icon: RupeeIcon,
       color: "bg-emerald-500",
       bg: "bg-emerald-50",
       text: "text-emerald-600",
