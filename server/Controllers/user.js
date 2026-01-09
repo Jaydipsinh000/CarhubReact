@@ -8,6 +8,9 @@ const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 // =======================
 // REGISTER USER
 // =======================
+// =======================
+// REGISTER USER
+// =======================
 export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
@@ -16,14 +19,28 @@ export const registerUser = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "All fields required" });
     }
 
-    const exists = await User.findOne({ email });
-    if (exists) {
-      return res.status(400).json({ success: false, message: "User already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
+    let user = await User.findOne({ email });
     const otp = generateOtp();
 
+    if (user) {
+      if (user.isVerified) {
+        return res.status(400).json({ success: false, message: "User already exists" });
+      }
+      // User exists but not verified (e.g. previous email failed). Update and resend.
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.name = name;
+      user.phone = phone;
+      user.password = hashedPassword;
+      user.otp = otp;
+      user.otpExpires = Date.now() + 10 * 60 * 1000;
+      await user.save();
+
+      req.otpData = { email, otp, type: "resend" };
+      return next();
+    }
+
+    // New User
+    const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({
       name,
       email,

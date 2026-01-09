@@ -21,6 +21,15 @@ const transporter = nodemailer.createTransport({
 console.log("--- Mailer Service Initialized ---");
 console.log("EMAIL_USER:", process.env.EMAIL_USER ? "Present" : "MISSING");
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Present" : "MISSING");
+
+transporter.verify(function (error, success) {
+  if (error) {
+    console.error("❌ SMTP Connection Error:", error);
+  } else {
+    console.log("✅ SMTP Server is ready to take our messages");
+  }
+});
+
 console.log("--- End Check ---");
 
 export default transporter;

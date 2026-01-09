@@ -66,14 +66,14 @@ const MyBookings = () => {
           </div>
         ) : (
           /* BOOKINGS GRID */
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {bookings.map((booking) => (
               <div
                 key={booking._id}
                 className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col"
               >
                 {/* IMAGE */}
-                <div className="relative h-56 overflow-hidden">
+                <div className="relative h-48 sm:h-56 overflow-hidden">
                   <img
                     src={getCarImage(booking.carId)}
                     alt={booking.carId?.name || "Car"}
