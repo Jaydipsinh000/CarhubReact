@@ -4,11 +4,14 @@ import AdminLayout from "./AdminLayout";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, Edit2, Trash2, Car, Fuel, Zap, Settings } from "lucide-react";
 
+import { getCarImage } from "../utils/imageUtils";
+
 const AdminCars = () => {
   const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
 
   const loadCars = async () => {
     try {
@@ -121,35 +124,11 @@ const AdminCars = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           <div className="w-16 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
-                            {car.images && car.images[0] ? (
-                              <img
-                                src={(() => {
-                                  const img = car.images && car.images[0];
-                                  if (!img || typeof img !== 'string') return "https://via.placeholder.com/400x300?text=No+Image";
-                                  if (img.startsWith("http")) return img;
-
-                                  // Normalize path: replace backslashes, remove leading slashes
-                                  let cleanPath = img.replace(/\\/g, "/");
-                                  while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
-
-                                  // Ensure it starts with uploads/
-                                  if (!cleanPath.startsWith("uploads/")) {
-                                    cleanPath = `uploads/${cleanPath}`;
-                                  }
-
-                                  const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-                                  const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-                                  return `${normalizedBase}/${cleanPath}`;
-                                })()}
-                                alt={car.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => e.target.style.display = 'none'}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <Car size={20} />
-                              </div>
-                            )}
+                            <img
+                              src={getCarImage(car)}
+                              alt={car.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
                           <div>
                             <p className="font-semibold text-gray-900">{car.name}</p>

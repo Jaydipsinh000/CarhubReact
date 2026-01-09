@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchCarById, fetchCars, checkAvailability } from "../Services/carApi";
+import { resolveImagePath, getCarImage } from "../utils/imageUtils";
 
 const CarDetails = () => {
   const { id } = useParams();
@@ -87,31 +88,7 @@ const CarDetails = () => {
 
   if (!car) return <p className="text-center mt-20">Car not found</p>;
 
-  // Helper for safe image resolution
-  const getCarImage = (car) => {
-    let img = car.image;
-    if (Array.isArray(img) && img.length > 0) img = img[0];
-    if (!img && car.images && car.images.length > 0) img = car.images[0];
-
-    if (!img || typeof img !== "string") {
-      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
-    }
-
-    if (img.startsWith("http")) return img;
-
-    // Normalize path: replace backslashes, remove leading slashes
-    let cleanPath = img.replace(/\\/g, "/");
-    while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
-
-    // Ensure it starts with uploads/
-    if (!cleanPath.startsWith("uploads/")) {
-      cleanPath = `uploads/${cleanPath}`;
-    }
-
-    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    return `${normalizedBase}/${cleanPath}`;
-  };
+  // Helper for safe image resolution (now using imported utility)
 
   const images = car.images?.length ? car.images : [car.image];
   const features = car.features || [
@@ -133,7 +110,7 @@ const CarDetails = () => {
             <div className="relative overflow-hidden rounded-3xl shadow-xl bg-black">
               <div className="aspect-[16/9]">
                 <img
-                  src={car.image}
+                  src={resolveImagePath(images[imgIndex])}
                   alt={car.name}
                   className="w-full h-full object-contain sm:object-cover"
                 />
@@ -174,13 +151,12 @@ const CarDetails = () => {
                 {images.map((img, i) => (
                   <img
                     key={i}
-                    src={getCarImage(car, i)}
+                    src={resolveImagePath(img)}
                     onClick={() => setImgIndex(i)}
-                    className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${
-                      imgIndex === i
-                        ? "border-blue-600 scale-105"
-                        : "border-transparent hover:border-gray-300"
-                    }`}
+                    className={`h-20 w-28 sm:h-24 sm:w-32 object-cover rounded-xl cursor-pointer border-2 transition-all ${imgIndex === i
+                      ? "border-blue-600 scale-105"
+                      : "border-transparent hover:border-gray-300"
+                      }`}
                   />
                 ))}
               </div>
@@ -216,11 +192,10 @@ const CarDetails = () => {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`pb-3 font-semibold ${
-                  tab === t
-                    ? "border-b-2 border-black text-black"
-                    : "text-gray-500"
-                }`}
+                className={`pb-3 font-semibold ${tab === t
+                  ? "border-b-2 border-black text-black"
+                  : "text-gray-500"
+                  }`}
               >
                 {t.toUpperCase()}
               </button>
@@ -302,7 +277,7 @@ const CarDetails = () => {
                 className="bg-white rounded-xl shadow hover:shadow-lg cursor-pointer transition"
               >
                 <img
-                  src={c.image}
+                  src={getCarImage(c)}
                   className="h-40 w-full object-cover rounded-t-xl"
                   alt={c.name}
                 />

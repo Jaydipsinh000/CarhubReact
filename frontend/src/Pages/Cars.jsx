@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchCars } from "../Services/carApi";
+import { getCarImage } from "../utils/imageUtils";
 import {
   Search,
   Filter,
@@ -63,28 +64,10 @@ const Cars = () => {
   const brands = ["All", ...new Set(cars.map((c) => c.brand))];
   const fuels = ["All", ...new Set(cars.map((c) => c.fuelType))];
 
-  const getCarImage = (car) => {
-    let img = car.image;
-    if (Array.isArray(img)) img = img[0];
-    if (!img && car.images?.length) img = car.images[0];
 
-    if (!img || typeof img !== "string") {
-      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf";
-    }
-
-    if (img.startsWith("http")) return img;
-
-    const cleanPath = img.replace(/\\/g, "/").replace(/^\/+/, "");
-    const base =
-      import.meta.env.VITE_IMAGE_BASE_URL ||
-      "https://carent-qdwb.onrender.com";
-
-    return `${base.replace(/\/$/, "")}/uploads/${cleanPath}`;
-  };
 
   const handleBookNow = (id) => {
-    const token = localStorage.getItem("token");
-    if (!token) return setShowAuthModal(true);
+    // Navigate directly to details page. Login check happens at booking stage.
     navigate(`/cars/${id}`);
   };
 
@@ -289,9 +272,10 @@ const Cars = () => {
                 {/* IMAGE AREA */}
                 <div className="relative h-64 overflow-hidden bg-gray-100">
                   <img
-                    src={car.image}
+                    src={getCarImage(car)}
                     alt={car.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onClick={() => handleBookNow(car._id)}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

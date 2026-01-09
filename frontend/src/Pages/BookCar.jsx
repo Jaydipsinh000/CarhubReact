@@ -6,6 +6,7 @@ import axios from "axios";
 import { fetchCarById } from "../Services/carApi";
 import { createOrder, verifyPayment } from "../Services/paymentApi";
 import { Calendar, CreditCard, ShieldCheck, MapPin, Phone, User, Info, CheckCircle, AlertCircle } from "lucide-react";
+import { getCarImage } from "../utils/imageUtils";
 
 // Helper for premium inputs
 const FormInput = ({ icon: Icon, label, ...props }) => (
@@ -259,28 +260,7 @@ const BookCar = () => {
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
             <div className="relative h-48">
               <img
-                src={(() => {
-                  let img = import.meta.env.VITE_IMAGE_BASE_URL ? car.images?.find(i => i.includes(import.meta.env.VITE_IMAGE_BASE_URL)) : null;
-                  if (Array.isArray(img) && img.length > 0) img = img[0];
-                  if (!img && car.images?.length > 0) img = car.images[0];
-
-                  if (!img || typeof img !== 'string') return "https://via.placeholder.com/400x300?text=No+Image";
-
-                  if (img.startsWith("http")) return img;
-
-                  // Normalize path: replace backslashes, remove leading slashes
-                  let cleanPath = img.replace(/\\/g, "/");
-                  while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
-
-                  // Ensure it starts with uploads/
-                  if (!cleanPath.startsWith("uploads/")) {
-                    cleanPath = `uploads/${cleanPath}`;
-                  }
-
-                  const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-                  const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-                  return `${normalizedBase}/${cleanPath}`;
-                })()}
+                src={getCarImage(car)}
                 alt={car.name}
                 className="w-full h-full object-cover"
               />

@@ -3,6 +3,8 @@ import { getMyBookings } from "../Services/paymentApi.js";
 import { Calendar, MapPin, CreditCard, Clock, ArrowRight, Car } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { getCarImage } from "../utils/imageUtils";
+
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,34 +23,6 @@ const MyBookings = () => {
 
     fetchBookings();
   }, []);
-
-  // Helper for safe image resolution
-  const getCarImage = (booking) => {
-    if (!booking || !booking.carId) return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
-
-    let img = booking.carId.image;
-    if (Array.isArray(img) && img.length > 0) img = img[0];
-    if (!img && booking.carId.images && booking.carId.images.length > 0) img = booking.carId.images[0];
-
-    if (!img || typeof img !== 'string') {
-      return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
-    }
-
-    if (img.startsWith("http")) return img;
-
-    // Normalize path: replace backslashes, remove leading slashes
-    let cleanPath = img.replace(/\\/g, "/");
-    while (cleanPath.startsWith("/")) cleanPath = cleanPath.substring(1);
-
-    // Ensure it starts with uploads/
-    if (!cleanPath.startsWith("uploads/")) {
-      cleanPath = `uploads/${cleanPath}`;
-    }
-
-    const baseUrl = import.meta.env.VITE_IMAGE_BASE_URL || "https://carent-qdwb.onrender.com";
-    const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    return `${normalizedBase}/${cleanPath}`;
-  };
 
   if (loading)
     return (
@@ -101,7 +75,7 @@ const MyBookings = () => {
                 {/* IMAGE */}
                 <div className="relative h-56 overflow-hidden">
                   <img
-                    src={getCarImage(booking)}
+                    src={getCarImage(booking.carId)}
                     alt={booking.carId?.name || "Car"}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
