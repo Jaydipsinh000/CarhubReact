@@ -111,10 +111,10 @@ const AdminCars = () => {
                     <th className="px-6 py-4">Specs</th>
                     <th className="px-6 py-4">Price / Day</th>
                     <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">Owner</th>
                     <th className="px-6 py-4 text-end">Actions</th>
                   </tr>
                 </thead>
-
                 <tbody className="divide-y divide-gray-50">
                   {filteredCars.map((car) => (
                     <tr
@@ -152,6 +152,21 @@ const AdminCars = () => {
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${true ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-red-50 text-red-600 border-red-100"}`}>
                           Available
                         </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {car.createdBy ? (
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{car.createdBy.name}</p>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Partner
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                            Admin
+                          </span>
+                        )}
                       </td>
 
                       <td className="px-6 py-4 text-end">

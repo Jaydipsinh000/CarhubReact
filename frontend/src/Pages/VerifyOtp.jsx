@@ -32,8 +32,10 @@ const VerifyOtp = () => {
 
       toast.success("OTP verified successfully 🎉");
 
-      // 🔹 NAVIGATE TO HOME
-      navigate("/");
+      // 🔹 NAVIGATE BASED ON ROLE
+      if (user.role === "admin") navigate("/admin/dashboard");
+      else if (user.role === "seller") navigate("/seller/dashboard");
+      else navigate("/");
     } catch (err) {
       toast.error(err.response?.data?.message || "OTP verification failed");
     }

@@ -1,7 +1,7 @@
 import express from "express";
 import User from "../Models/User.js";
 import Booking from "../Models/Booking.js";
-import { getAdminStats } from "../Controllers/adminController.js";
+import { getAdminStats, deleteUser, deleteBooking } from "../Controllers/adminController.js";
 import { protect, adminOnly } from "../Middleware/authAdmin.js";
 
 const router = express.Router();
@@ -12,6 +12,10 @@ const router = express.Router();
  * ======================
  */
 router.get("/stats", protect, adminOnly, getAdminStats);
+
+// DELETE ACTIONS
+router.delete("/users/:id", protect, adminOnly, deleteUser);
+router.delete("/bookings/:id", protect, adminOnly, deleteBooking);
 
 /**
  * ======================
@@ -43,8 +47,12 @@ router.get("/users", protect, adminOnly, async (req, res) => {
 router.get("/bookings", protect, adminOnly, async (req, res) => {
   try {
     const bookings = await Booking.find()
-      .populate("user", "name email")
-      .populate("carId", "name brand")
+      .populate("user", "name email image")
+      .populate({
+        path: "carId",
+        select: "name brand pricePerDay images",
+        populate: { path: "createdBy", select: "name email" } // Seller Info
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -70,7 +78,11 @@ router.get("/payments", protect, adminOnly, async (req, res) => {
   try {
     const payments = await Booking.find()
       .populate("user", "name email")
-      .populate("carId", "name brand")
+      .populate({
+        path: "carId",
+        select: "name brand",
+        populate: { path: "createdBy", select: "name email" }
+      })
       .select("user carId amount paymentStatus createdAt")
       .sort({ createdAt: -1 });
 

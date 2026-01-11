@@ -96,7 +96,7 @@ const Register = () => {
                   size="large"
                   text="signup_with"
                   shape="circle"
-                  width="100%"
+                  width="300px"
                 />
               </div>
 
@@ -185,7 +185,17 @@ const Register = () => {
               </button>
             </form>
 
-            <p className="mt-8 text-center text-gray-600">
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <p className="text-center text-sm text-gray-500 mb-4">Looking to list your car?</p>
+              <Link
+                to="/register-seller"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-yellow-50 text-yellow-700 font-bold rounded-xl border border-yellow-200 hover:bg-yellow-100 transition-colors"
+              >
+                Register as a Seller
+              </Link>
+            </div>
+
+            <p className="mt-6 text-center text-gray-600">
               Already have an account?{" "}
               <Link to="/login" className="text-blue-600 font-bold hover:underline">
                 Login

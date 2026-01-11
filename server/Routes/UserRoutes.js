@@ -1,5 +1,5 @@
 import express from "express";
-import { loginUser, registerUser, verifyOtp, googleLogin } from "../Controllers/user.js";
+import { loginUser, registerUser, verifyOtp, googleLogin, forgotPassword, resetPassword } from "../Controllers/user.js";
 import sendOtpMail from "../Middleware/sendOtpMail.js"; // import middleware
 import authUser from "../Middleware/authUser.js";
 
@@ -15,6 +15,13 @@ router.post("/verify-otp", verifyOtp);
 router.post("/login", loginUser);
 
 // Google Login
+// Google Login
 router.post("/google", googleLogin);
+
+// Forgot Password
+router.post("/forgot-password", forgotPassword, sendOtpMail);
+
+// Reset Password
+router.post("/reset-password", resetPassword);
 
 export default router;

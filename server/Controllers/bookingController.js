@@ -73,3 +73,25 @@ export const getMyBookings = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch bookings" });
   }
 };
+
+// =======================
+// GET SELLER BOOKINGS
+// =======================
+export const getSellerBookings = async (req, res) => {
+  try {
+    // 1. Find all cars created by this seller
+    const cars = await Car.find({ createdBy: req.user._id });
+    const carIds = cars.map((car) => car._id);
+
+    // 2. Find bookings for these cars
+    const bookings = await Booking.find({ carId: { $in: carIds } })
+      .populate("carId", "name brand image pricePerDay images")
+      .populate("user", "name email phone")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, bookings });
+  } catch (error) {
+    console.error("Get Seller Bookings Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+  }
+};

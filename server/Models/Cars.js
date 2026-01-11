@@ -45,23 +45,29 @@ const carSchema = new mongoose.Schema(
       default: true,
     },
 
+    listingType: {
+      type: String,
+      enum: ["Rent", "Sell"],
+      default: "Rent",
+    },
+
     // ✅ NEW: BOOKINGS FOR DATE AVAILABILITY
-   bookings: [
-  {
-    startDate: {
-      type: Date,
-      required: true,
-    },
-    endDate: {
-      type: Date,
-      required: true,
-    },
-    bookingId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Booking",
-    },
-  },
-],
+    bookings: [
+      {
+        startDate: {
+          type: Date,
+          required: true,
+        },
+        endDate: {
+          type: Date,
+          required: true,
+        },
+        bookingId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Booking",
+        },
+      },
+    ],
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

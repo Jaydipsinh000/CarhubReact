@@ -12,7 +12,7 @@ const Home = () => {
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop"
+            src="https://wallpapercave.com/wp/wp13583943.jpg"
             alt="Luxury Car Background"
             className="w-full h-full object-cover"
           />

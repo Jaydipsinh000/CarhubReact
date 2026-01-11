@@ -15,9 +15,13 @@ import Profile from "./Pages/Profile.jsx";
 import Cars from "./Pages/Cars.jsx";
 import CarDetails from "./Pages/CarDetails.jsx";
 import Terms from "./Pages/Terms.jsx";
+import RegisterSeller from "./Pages/RegisterSeller.jsx";
+import ForgotPassword from "./Pages/ForgotPassword.jsx";
+import ResetPassword from "./Pages/ResetPassword.jsx";
 
 // Admin
 import AdminDashboard from "./admin/AdminDashboard.jsx";
+import AdminReports from "./admin/AdminReports.jsx";
 import AdminCars from "./admin/AdminCars.jsx";
 import AdminRoute from "./Route/AdminRoute.jsx";
 import AdminAddCar from "./admin/AdminAddCar.jsx";
@@ -29,6 +33,14 @@ import MyBookings from "./Pages/MyBookings.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
 import AdminBookings from "./admin/AdminBookings.jsx";
 import AdminPayments from "./admin/AdminPayments.jsx";
+
+// Seller
+import SellerRoute from "./Route/SellerRoute.jsx";
+import SellerDashboard from "./seller/SellerDashboard.jsx";
+import SellerCars from "./seller/SellerCars.jsx";
+import SellerAddCar from "./seller/SellerAddCar.jsx";
+import SellerUpdateCar from "./seller/SellerUpdateCar.jsx";
+import SellerBookings from "./seller/SellerBookings.jsx";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -44,7 +56,8 @@ const App = () => {
 
   // 🔐 Hide header/footer on admin routes
   // 🔐 Hide header/footer on admin routes or standalone pages
-  const isStandalone = location.pathname.startsWith("/admin") || location.pathname === "/terms";
+  // 🔐 Hide header/footer on admin routes, seller routes, or standalone pages
+  const isStandalone = location.pathname.startsWith("/admin") || location.pathname.startsWith("/seller") || location.pathname === "/terms";
 
   return (
     <>
@@ -60,7 +73,10 @@ const App = () => {
         <Route path="/cars/:id" element={<CarDetails />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
+        <Route path="/register-seller" element={<RegisterSeller />} />
         <Route path="/verify-otp" element={<VerifyOtp setUser={setUser} />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/book/:id" element={<BookCar />} />
         <Route path="/my-bookings" element={<MyBookings />} />
@@ -151,6 +167,23 @@ const App = () => {
             </AdminRoute>
           }
         />
+        <Route
+          path="/admin/reports"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <AdminReports />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        />
+
+        {/* ===== SELLER ROUTES ===== */}
+        <Route path="/seller/dashboard" element={<SellerRoute><SellerDashboard /></SellerRoute>} />
+        <Route path="/seller/cars" element={<SellerRoute><SellerCars /></SellerRoute>} />
+        <Route path="/seller/bookings" element={<SellerRoute><SellerBookings /></SellerRoute>} />
+        <Route path="/seller/add-car" element={<SellerRoute><SellerAddCar /></SellerRoute>} />
+        <Route path="/seller/cars/update/:id" element={<SellerRoute><SellerUpdateCar /></SellerRoute>} />
       </Routes>
 
       {/* ❌ No Footer for Admin/Standalone */}

@@ -17,10 +17,13 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await api.post("/user/login", form);
+      const userData = res.data.user;
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("user", JSON.stringify(userData));
       toast.success("Logged in successfully!");
-      navigate("/");
+      if (userData.role === "admin") navigate("/admin/dashboard");
+      else if (userData.role === "seller") navigate("/seller/dashboard");
+      else navigate("/");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     }
@@ -38,10 +41,13 @@ const Login = () => {
         photo: decoded.picture
       });
 
+      const userData = res.data.user;
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      toast.success("Logged in with Google!");
-      navigate("/");
+      localStorage.setItem("user", JSON.stringify(userData));
+      toast.success("Logged in successfully!");
+      if (userData.role === "admin") navigate("/admin/dashboard");
+      else if (userData.role === "seller") navigate("/seller/dashboard");
+      else navigate("/");
     } catch (err) {
       console.error(err);
       toast.error("Google Login Failed");
@@ -98,7 +104,7 @@ const Login = () => {
                   size="large"
                   text="continue_with"
                   shape="circle"
-                  width="100%"
+                  width="300px"
                 />
               </div>
 

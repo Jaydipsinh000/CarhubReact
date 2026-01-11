@@ -5,8 +5,10 @@ import {
   getAllCars,
   getCarById,
   updateCar,
+  getMyCars,
 } from "../Controllers/carController.js";
 import { protect, adminOnly } from "../Middleware/authAdmin.js";
+import { sellerOnly } from "../Middleware/authSeller.js";
 import multer from "multer";
 import fs from "fs";
 import Car from "../Models/Cars.js";
@@ -43,12 +45,14 @@ const upload = multer({
 
 // PUBLIC ROUTES
 router.get("/", getAllCars);
-router.get("/:id", getCarById);
 
-// ADMIN ROUTES
-router.post("/add", protect, adminOnly, upload.array("images", 10), addCar);
-router.put("/update/:id", protect, adminOnly, upload.array("images", 10), updateCar);
-router.delete("/delete/:id", protect, adminOnly, deleteCar);
+// ADMIN & SELLER ROUTES
+router.get("/my-cars", protect, sellerOnly, getMyCars); // Moved up
+router.post("/add", protect, sellerOnly, upload.array("images", 10), addCar);
+router.put("/update/:id", protect, sellerOnly, upload.array("images", 10), updateCar);
+router.delete("/delete/:id", protect, sellerOnly, deleteCar);
+
+router.get("/:id", getCarById); // Specific ID route last
 
 
 

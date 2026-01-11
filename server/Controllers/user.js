@@ -13,7 +13,7 @@ const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 // =======================
 export const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields required" });
@@ -49,6 +49,7 @@ export const registerUser = async (req, res, next) => {
       otp,
       otpExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
       isVerified: false,
+      role: role === "seller" ? "seller" : "user",
     });
 
     // Set OTP data for middleware
@@ -209,3 +210,64 @@ export const googleLogin = async (req, res) => {
     res.status(500).json({ success: false, message: "Google Login failed" });
   }
 };
+
+// =======================
+// FORGOT PASSWORD
+// =======================
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Generate OTP
+    const otp = generateOtp();
+    user.otp = otp;
+    user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    await user.save();
+
+    // Pass to mailer middleware
+    req.otpData = { email, otp, type: "reset" };
+    next();
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// =======================
+// RESET PASSWORD
+// =======================
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user || user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // Update Password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    // Clear OTP
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password reset successfully. Please login." });
+
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ message: "Failed to reset password" });
+  }
+};
+

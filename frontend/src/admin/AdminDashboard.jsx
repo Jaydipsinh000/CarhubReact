@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAdminStats } from "../Services/adminApi.js";
 import AdminLayout from "./AdminLayout.jsx";
 import {
@@ -26,6 +27,7 @@ import {
 const COLORS = ["#10b981", "#ef4444"];
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState({
     totalCars: 0,
     unavailableCars: 0,
@@ -100,13 +102,13 @@ const AdminDashboard = () => {
     data.monthlyStats?.length > 0
       ? data.monthlyStats
       : [
-          { name: "Jan", bookings: 4, revenue: 12000 },
-          { name: "Feb", bookings: 7, revenue: 21000 },
-          { name: "Mar", bookings: 5, revenue: 15000 },
-          { name: "Apr", bookings: 12, revenue: 36000 },
-          { name: "May", bookings: 10, revenue: 30000 },
-          { name: "Jun", bookings: 16, revenue: 48000 },
-        ];
+        { name: "Jan", bookings: 4, revenue: 12000 },
+        { name: "Feb", bookings: 7, revenue: 21000 },
+        { name: "Mar", bookings: 5, revenue: 15000 },
+        { name: "Apr", bookings: 12, revenue: 36000 },
+        { name: "May", bookings: 10, revenue: 30000 },
+        { name: "Jun", bookings: 16, revenue: 48000 },
+      ];
 
   const carPieData = [
     {
@@ -130,7 +132,7 @@ const AdminDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-200">
+            <span className="text-sm text-gray-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -138,6 +140,12 @@ const AdminDashboard = () => {
                 day: "numeric",
               })}
             </span>
+            <button
+              onClick={() => navigate("/admin/reports")}
+              className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-lg"
+            >
+              View Reports
+            </button>
           </div>
         </div>
 
@@ -415,11 +423,10 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                            booking.paymentStatus === "paid"
-                              ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                              : "bg-yellow-50 text-yellow-600 border-yellow-100"
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs font-medium border ${booking.paymentStatus === "paid"
+                            ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                            : "bg-yellow-50 text-yellow-600 border-yellow-100"
+                            }`}
                         >
                           {booking.paymentStatus || "Pending"}
                         </span>
