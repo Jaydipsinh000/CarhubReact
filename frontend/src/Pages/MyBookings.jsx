@@ -8,14 +8,18 @@ import { getCarImage } from "../utils/imageUtils";
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         const res = await getMyBookings();
-        setBookings(res.data);
+        setBookings(res.data || []);
+        setError(null);
       } catch (err) {
-        console.error(err);
+        console.error("Fetch Bookings Error:", err);
+        setError(err.response?.data?.message || "Failed to load bookings. Please try again.");
+        setBookings([]);
       } finally {
         setLoading(false);
       }
@@ -35,31 +39,45 @@ const MyBookings = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 font-display tracking-tight">
+        <div className="mb-6 sm:mb-10">
+          <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 font-display tracking-tight">
             My Bookings
           </h1>
-          <p className="text-gray-500 mt-2 text-lg">
+          <p className="text-gray-500 mt-1 sm:mt-2 text-base sm:text-lg">
             Manage your upcoming trips and viewing history
           </p>
         </div>
 
-        {bookings.length === 0 ? (
+        {/* ERROR STATE */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-center">
+            <p className="font-medium">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-sm underline hover:no-underline"
+            >
+              Tap to retry
+            </button>
+          </div>
+        )}
+
+        {bookings.length === 0 && !error ? (
           /* EMPTY STATE */
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100 text-center">
-            <div className="w-24 h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
-              <Car size={48} />
+          <div className="flex flex-col items-center justify-center py-16 sm:py-20 bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 text-center px-4">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+              <Car size={40} className="sm:hidden" />
+              <Car size={48} className="hidden sm:block" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 font-display">No bookings yet</h2>
-            <p className="text-gray-500 max-w-md mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 font-display">No bookings yet</h2>
+            <p className="text-gray-500 max-w-md mb-6 sm:mb-8 text-sm sm:text-base">
               You haven't booked any cars yet. Start your journey by exploring our premium fleet.
             </p>
             <Link
               to="/cars"
-              className="px-8 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-200"
+              className="px-6 sm:px-8 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-200 text-sm sm:text-base"
             >
               Explore Cars
             </Link>

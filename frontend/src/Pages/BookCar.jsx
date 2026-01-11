@@ -1,23 +1,26 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { fetchCarById } from "../Services/carApi";
 import { createOrder, verifyPayment } from "../Services/paymentApi";
-import { Calendar, CreditCard, ShieldCheck, MapPin, Phone, User, Info, CheckCircle, AlertCircle } from "lucide-react";
+import { Calendar, CreditCard, ShieldCheck, MapPin, Phone, User, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
 import { getCarImage } from "../utils/imageUtils";
+import Terms from "./Terms.jsx";
 
 // Helper for premium inputs
 const FormInput = ({ icon: Icon, label, ...props }) => (
-  <div className="space-y-1.5">
-    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-      {Icon && <Icon size={14} className="text-blue-500" />} {label}
+  <div className="space-y-2">
+    <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+      {Icon && <Icon size={16} className="text-blue-500" />} {label}
     </label>
-    <input
-      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 placeholder:text-gray-400"
-      {...props}
-    />
+    <div className="relative">
+      <input
+        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 pl-4 focus:ring-2 focus:ring-black/5 focus:border-black outline-none transition-all text-gray-900 placeholder:text-gray-400 font-medium"
+        {...props}
+      />
+    </div>
   </div>
 );
 
@@ -50,7 +53,6 @@ const BookCar = () => {
 
   /* ================= FETCH CAR ================= */
   useEffect(() => {
-    // Auth Check
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please login to continue booking");
@@ -62,7 +64,7 @@ const BookCar = () => {
       try {
         const res = await fetchCarById(id);
         setCar(res.data.car);
-        // Pre-fill user data if available in localStorage
+        // Pre-fill user data
         const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
           setForm(prev => ({
@@ -79,31 +81,18 @@ const BookCar = () => {
       }
     };
     loadCar();
+    window.scrollTo(0, 0);
   }, [id]);
 
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
-        <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full mb-4" />
-        <p className="text-gray-500 font-medium">Preparing your vehicle...</p>
+        <div className="animate-spin h-12 w-12 border-4 border-black border-t-transparent rounded-full mb-4" />
       </div>
     );
   }
 
-  if (!car) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center p-4">
-        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
-          <AlertCircle size={32} />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900">Vehicle Not Found</h2>
-        <p className="text-gray-500 mt-2 text-sm">The car you are looking for is currently unavailable or does not exist.</p>
-        <button onClick={() => navigate('/cars')} className="mt-6 px-6 py-2 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition">
-          Browse Fleet
-        </button>
-      </div>
-    );
-  }
+  if (!car) return <div className="text-center p-10">Car not found</div>;
 
   /* ================= CALCULATIONS ================= */
   const excludedRanges =
@@ -121,7 +110,6 @@ const BookCar = () => {
 
   /* ================= HANDLE BOOKING ================= */
   const handleBooking = async () => {
-    // Validation
     if (!startDate || !endDate) return alert("Please select your travel dates");
     if (!form.fullName || !form.phone || !form.email || !form.licenseNumber || !form.licenseExpiry) {
       return alert("Please fill in all required driver details");
@@ -132,13 +120,6 @@ const BookCar = () => {
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to book a car.");
-        navigate("/login");
-        return;
-      }
-
-      // 1. Create Booking Entry
       const bookingRes = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/bookings/book`,
         {
@@ -152,20 +133,14 @@ const BookCar = () => {
       );
 
       const bookingId = bookingRes.data.booking._id;
+      const orderRes = await createOrder({ amount: totalPrice, bookingId });
 
-      // 2. Create Razorpay Order
-      const orderRes = await createOrder({
-        amount: totalPrice,
-        bookingId,
-      });
-
-      // 3. Initialize Razorpay
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderRes.data.amount,
         currency: "INR",
         name: "Carent Premium",
-        description: `Rental: ${car.name} (${totalDays} Days)`,
+        description: `Rental: ${car.name}`,
         order_id: orderRes.data.id,
         handler: async function (response) {
           try {
@@ -175,109 +150,107 @@ const BookCar = () => {
               orderId: response.razorpay_order_id,
               signature: response.razorpay_signature,
             });
-
-            // Success Redirect
             navigate("/my-bookings");
           } catch (err) {
-            console.error(err);
-            alert("Payment verification failed. Please contact support.");
+            alert("Payment verification failed.");
           }
         },
-        prefill: {
-          name: form.fullName,
-          email: form.email,
-          contact: form.phone,
-        },
-        theme: { color: "#0f172a" },
-        modal: {
-          ondismiss: function () {
-            setProcessing(false);
-          }
-        }
+        prefill: { name: form.fullName, email: form.email, contact: form.phone },
+        theme: { color: "#000000" },
+        modal: { ondismiss: () => setProcessing(false) }
       };
 
       if (!window.Razorpay) {
-        alert("Payment gateway failed to load. Please check your connection.");
+        alert("Payment gateway failed to load.");
         setProcessing(false);
         return;
       }
-
       new window.Razorpay(options).open();
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Booking failed. Please try again.");
+      alert(err.response?.data?.message || "Booking failed.");
       setProcessing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pt-24 pb-12 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-8">
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
 
-        {/* === LEFT COLUMN: FORM === */}
-        <div className="lg:col-span-2 space-y-6">
-
-          {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 font-display">Confirm your Booking</h1>
-            <p className="text-gray-500 mt-1">Complete the form below to secure your ride.</p>
-          </div>
-
-          {/* Personal Details */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <User className="text-blue-600" size={20} /> Driver Details
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              <FormInput icon={User} label="Full Name" placeholder="e.g. John Doe" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
-              <FormInput icon={Phone} label="Phone Number" placeholder="+91 98765 43210" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              <FormInput icon={CheckCircle} label="Email Address" type="email" placeholder="john@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <FormInput icon={MapPin} label="Residential Address" placeholder="Your full address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-            </div>
-          </div>
-
-          {/* License & Emergency */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <ShieldCheck className="text-blue-600" size={20} /> License & Emergency
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-6 mb-6">
-              <FormInput label="License Number" placeholder="DL-1234567890123" value={form.licenseNumber} onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })} />
-              <FormInput label="License Expiry" type="date" value={form.licenseExpiry} onChange={(e) => setForm({ ...form, licenseExpiry: e.target.value })} />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
-              <FormInput label="Emergency Contact Name" placeholder="Relative/Friend Name" value={form.emergencyName} onChange={(e) => setForm({ ...form, emergencyName: e.target.value })} />
-              <FormInput label="Emergency Phone" placeholder="Their contact number" value={form.emergencyPhone} onChange={(e) => setForm({ ...form, emergencyPhone: e.target.value })} />
-            </div>
-          </div>
-
+      {/* HEADER */}
+      <div className="bg-black text-white pt-28 pb-32 px-4 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto relative z-10">
+          <button onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2 text-white/60 hover:text-white transition">
+            <ArrowLeft size={20} /> Back to details
+          </button>
+          <h1 className="text-4xl md:text-5xl font-bold font-display">Secure Your Booking</h1>
+          <p className="text-gray-400 mt-2 text-lg">You are almost there! Complete the details below.</p>
         </div>
+        {/* Abstract shapes */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full blur-[100px] opacity-20 -translate-y-1/2 translate-x-1/2" />
+      </div>
 
-        {/* === RIGHT COLUMN: SUMMARY === */}
-        <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 -mt-20">
+        <div className="grid lg:grid-cols-3 gap-8">
 
-          {/* Car Summary Card */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-24">
-            <div className="relative h-48">
-              <img
-                src={getCarImage(car)}
-                alt={car.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white">
-                <h3 className="text-2xl font-bold font-display">{car.name}</h3>
-                <p className="opacity-90">{car.brand} • {car.transmission}</p>
+          {/* === LEFT COLUMN: FORM === */}
+          <div className="lg:col-span-2 space-y-8">
+
+            {/* 1. Driver Details */}
+            <div className="bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100">
+              <div className="flex items-center gap-4 border-b border-gray-100 pb-6 mb-8">
+                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl">1</div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Driver Information</h2>
+                  <p className="text-sm text-gray-500">Who will be driving the vehicle?</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormInput icon={User} label="Full Name" placeholder="e.g. John Doe" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+                <FormInput icon={Phone} label="Phone Number" placeholder="+91 98765 43210" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <FormInput icon={CheckCircle} label="Email Address" type="email" placeholder="john@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <FormInput icon={MapPin} label="Residential Address" placeholder="Your full address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Date Picker */}
-              <div>
-                <label className="text-sm font-bold text-gray-700 mb-3 block flex items-center gap-2">
-                  <Calendar size={16} className="text-blue-500" /> Select Dates
-                </label>
-                <div className="flex justify-center bg-gray-50 rounded-xl p-2">
+            {/* 2. License Details */}
+            <div className="bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 border border-gray-100">
+              <div className="flex items-center gap-4 border-b border-gray-100 pb-6 mb-8">
+                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl">2</div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">License & Safety</h2>
+                  <p className="text-sm text-gray-500">Required for insurance validation</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormInput label="License Number" placeholder="DL-1234567890123" value={form.licenseNumber} onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })} />
+                <FormInput label="License Expiry" type="date" value={form.licenseExpiry} onChange={(e) => setForm({ ...form, licenseExpiry: e.target.value })} />
+                <FormInput label="Emergency Contact Name" placeholder="Relative Name" value={form.emergencyName} onChange={(e) => setForm({ ...form, emergencyName: e.target.value })} />
+                <FormInput label="Emergency Phone" placeholder="Their contact number" value={form.emergencyPhone} onChange={(e) => setForm({ ...form, emergencyPhone: e.target.value })} />
+              </div>
+            </div>
+
+          </div>
+
+          {/* === RIGHT COLUMN: SUMMARY === */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 sticky top-24">
+              <h2 className="text-xl font-bold mb-6 font-display">Booking Summary</h2>
+
+              {/* Car Mini Card */}
+              <div className="flex gap-4 items-center bg-gray-50 p-4 rounded-2xl mb-6">
+                <img src={getCarImage(car)} className="w-20 h-20 object-cover rounded-xl" alt="car" />
+                <div>
+                  <h3 className="font-bold text-gray-900">{car.name}</h3>
+                  <p className="text-sm text-gray-500">{car.brand}</p>
+                  <p className="text-xs text-blue-600 font-semibold mt-1">₹{car.pricePerDay}/day</p>
+                </div>
+              </div>
+
+              {/* Date Selection */}
+              <div className="mb-6">
+                <label className="text-sm font-bold text-gray-500 uppercase mb-3 block">Travel Dates</label>
+                <div className="flex justify-center bg-gray-50 rounded-2xl p-2">
                   <DatePicker
                     selectsRange
                     startDate={startDate}
@@ -291,51 +264,37 @@ const BookCar = () => {
                 </div>
               </div>
 
-              {/* Price Breakdown */}
-              <div className="bg-blue-50/50 rounded-xl p-4 space-y-3">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Rate per day</span>
-                  <span className="font-medium text-gray-900">₹{car.pricePerDay.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
+              {/* Total Calculation */}
+              <div className="space-y-3 py-6 border-t border-b border-gray-100">
+                <div className="flex justify-between text-gray-600">
                   <span>Duration</span>
                   <span className="font-medium text-gray-900">{totalDays} Days</span>
                 </div>
-                <div className="border-t border-blue-100 pt-3 flex justify-between items-center">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span className="font-medium text-gray-900">₹{totalPrice.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center text-lg pt-2">
                   <span className="font-bold text-gray-900">Total Payable</span>
-                  <span className="text-2xl font-bold text-blue-600">₹{totalPrice.toLocaleString()}</span>
+                  <span className="font-bold text-blue-600">₹{totalPrice.toLocaleString()}</span>
                 </div>
               </div>
 
-              {/* Terms & Action */}
-              <div className="space-y-4">
-                <label className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
-                  <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
-                  <div className="text-sm text-gray-500 leading-snug">
-                    I agree to the <button onClick={(e) => { e.preventDefault(); setShowTerms(!showTerms) }} className="text-blue-600 font-medium hover:underline">Terms & Conditions</button>, including damage policy and traffic fines responsibility.
-                  </div>
+              {/* Terms */}
+              <div className="mt-6 space-y-4">
+                <label className="flex gap-3 cursor-pointer">
+                  <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500" />
+                  <span className="text-xs text-gray-500">I agree to the <span onClick={() => setShowTerms(true)} className="text-blue-600 font-medium underline cursor-pointer">Terms & Conditions</span> and Privacy Policy.</span>
                 </label>
-
-                {showTerms && (
-                  <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mx-2 border border-gray-200">
-                    • Security deposit may apply upon pickup<br />
-                    • Fuel policy: Full to Full<br />
-                    • Valid ID & License required at pickup
-                  </div>
-                )}
 
                 <button
                   onClick={handleBooking}
                   disabled={!agree || processing || totalDays === 0}
-                  className={`w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all transform active:scale-95
-                            ${agree && totalDays > 0 && !processing ? "bg-black text-white hover:bg-gray-900 shadow-lg shadow-gray-200" : "bg-gray-200 text-gray-400 cursor-not-allowed"}
-                        `}
+                  className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all
+                    ${agree && totalDays > 0 ? "bg-black text-white hover:bg-gray-800 shadow-lg" : "bg-gray-100 text-gray-400 cursor-not-allowed"}
+                  `}
                 >
-                  {processing ? (
-                    <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</>
-                  ) : (
-                    <>Confirm & Pay <CreditCard size={20} /></>
-                  )}
+                  {processing ? "Processing..." : "Confirm & Pay"}
                 </button>
               </div>
             </div>
@@ -343,6 +302,13 @@ const BookCar = () => {
 
         </div>
       </div>
+
+      {/* TERMS MODAL */}
+      {showTerms && (
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+          <Terms onBack={() => setShowTerms(false)} />
+        </div>
+      )}
     </div>
   );
 };

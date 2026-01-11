@@ -38,7 +38,7 @@ coverage/
 .tmp/
 
 # Uploads (if using multer or similar)
-uploads/
+
 
 # Database (local files)
 *.sqlite

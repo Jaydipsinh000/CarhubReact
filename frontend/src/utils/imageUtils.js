@@ -1,4 +1,5 @@
 export const resolveImagePath = (imgPath) => {
+    // console.log("Resolving Image Path Input:", imgPath);
     if (!imgPath || typeof imgPath !== 'string') {
         return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
     }
@@ -9,7 +10,6 @@ export const resolveImagePath = (imgPath) => {
     let cleanPath = imgPath.replace(/\\/g, "/");
 
     // Smart extraction: handle absolute paths containing "uploads/"
-    // This handles cases like "C:/Users/.../server/uploads/img.jpg" or "uploads/img.jpg"
     const idx = cleanPath.toLowerCase().indexOf("uploads/");
     if (idx !== -1) {
         cleanPath = cleanPath.substring(idx);
@@ -24,14 +24,17 @@ export const resolveImagePath = (imgPath) => {
     }
 
     // Resolve Base URL
-    // Fallback to http://127.0.0.1:5000 for local development if env is missing, localhost, OR if we are running on localhost
     let baseUrl = import.meta.env.VITE_IMAGE_BASE_URL;
 
-    // Check if we are running locally (frontend on localhost)
+    // Detect environment
     const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-    if (!baseUrl || baseUrl.includes("localhost") || isLocal) {
+    if (isLocal) {
+        // Force local backend for local development
         baseUrl = "http://127.0.0.1:5000";
+    } else if (!baseUrl || baseUrl.includes("localhost")) {
+        // Force Live Render Backend if we are on Vercel/Live and env is missing or wrongly pointing to localhost
+        baseUrl = "https://carent-qdwb.onrender.com";
     }
 
     // Cleanup base url
@@ -39,9 +42,10 @@ export const resolveImagePath = (imgPath) => {
 
     try {
         const url = new URL(cleanPath, baseUrl);
+        // console.log("Final Resolved URL:", url.href);
         return url.href;
     } catch (e) {
-        console.error("Image URL Error:", cleanPath, baseUrl);
+        console.error("Image URL Error:", cleanPath, baseUrl, e);
         return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
     }
 };

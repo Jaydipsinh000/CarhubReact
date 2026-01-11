@@ -2,16 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchCars } from "../Services/carApi";
 import { getCarImage } from "../utils/imageUtils";
-import {
-  Search,
-  Filter,
-  Fuel,
-  Settings,
-  Zap,
-  ArrowRight,
-  Car as CarIcon,
-  AlertCircle,
-} from "lucide-react";
+import { Search, Filter, Fuel, Settings, Zap, ArrowRight, X, SlidersHorizontal } from "lucide-react";
 import AuthModal from "../Components/AuthModal";
 
 const Cars = () => {
@@ -64,10 +55,7 @@ const Cars = () => {
   const brands = ["All", ...new Set(cars.map((c) => c.brand))];
   const fuels = ["All", ...new Set(cars.map((c) => c.fuelType))];
 
-
-
   const handleBookNow = (id) => {
-    // Navigate directly to details page. Login check happens at booking stage.
     navigate(`/cars/${id}`);
   };
 
@@ -76,251 +64,217 @@ const Cars = () => {
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-          <p className="text-gray-500 font-medium animate-pulse">Loading premium fleet...</p>
         </div>
       </div>
     );
 
-
-
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-      />
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
 
-      {/* HERO */}
-      <div className="relative bg-black text-white py-24 text-center">
-        <h1 className="text-5xl font-bold">
-          Find Your <span className="text-blue-500">Perfect Drive</span>
-        </h1>
-        <p className="text-gray-400 mt-4">
-          Premium & luxury cars at best price
-        </p>
+      {/* HEADER */}
+      <div className="bg-black text-white pt-32 pb-20 px-4">
+        <div className="max-w-7xl mx-auto text-center space-y-4">
+          <h1 className="text-4xl md:text-6xl font-bold font-display tracking-tight">
+            Premium <span className="text-blue-500">Selection</span>
+          </h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto font-light">
+            Choose from our exclusive fleet of luxury vehicles for your next journey.
+          </p>
+        </div>
       </div>
 
-      {/* MOBILE FILTER BUTTON */}
-      <div className="md:hidden sticky top-16 z-30 px-4 -mt-8">
-        <button
-          onClick={() => setShowFilters(true)}
-          className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl shadow-xl"
-        >
-          <Filter size={18} />
-          Filters
-        </button>
-      </div>
+      {/* FILTERS & CONTENT */}
+      <div className="max-w-7xl mx-auto px-4 -mt-10 pb-20">
+        <div className="grid lg:grid-cols-4 gap-8">
 
-      {/* DESKTOP FILTER BAR (UNCHANGED DESIGN) */}
-      <div className="hidden md:block sticky top-16 z-30 px-4 -mt-8">
-        <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-xl border shadow-xl rounded-2xl p-5">
-          <div className="grid grid-cols-12 gap-4">
+          {/* SIDEBAR FILTERS (Desktop) */}
+          <div className="hidden lg:block space-y-6">
+            <div className="bg-white rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-gray-100 sticky top-24">
+              <div className="flex items-center gap-2 mb-6 text-gray-900">
+                <SlidersHorizontal size={20} />
+                <h3 className="font-bold text-lg">Filters</h3>
+              </div>
 
-            <div className="col-span-4 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border rounded-xl"
-                placeholder="Search by name or brand..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <div className="space-y-6">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                    placeholder="Search cars..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                {/* Brand */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-500 uppercase">Brand</label>
+                  <div className="relative">
+                    <select
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                      className="w-full appearance-none bg-gray-50 border border-gray-100 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium transition cursor-pointer"
+                    >
+                      {brands.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-500 uppercase">Max Price</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="e.g. 5000"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl"
+                      value={maxPriceInput}
+                      onChange={(e) => setMaxPriceInput(e.target.value)}
+                    />
+                    <button
+                      onClick={() => setAppliedMaxPrice(maxPriceInput)}
+                      className="bg-black text-white px-4 rounded-xl hover:bg-gray-800 transition"
+                    >
+                      Go
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div className="col-span-2 relative">
-              <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <select
-                className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl appearance-none"
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-              >
-                {brands.map((b) => (
-                  <option key={b}>{b}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-span-2 relative">
-              <Fuel className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <select
-                className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl appearance-none"
-                value={fuel}
-                onChange={(e) => setFuel(e.target.value)}
-              >
-                {fuels.map((f) => (
-                  <option key={f}>{f}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-span-2 relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                ₹
-              </span>
-              <input
-                type="number"
-                placeholder="Max Price"
-                className="w-full pl-8 pr-4 py-3 bg-gray-50 border rounded-xl"
-                value={maxPriceInput}
-                onChange={(e) => setMaxPriceInput(e.target.value)}
-              />
-            </div>
-
+          {/* MOBILE FILTER TOGGLE */}
+          <div className="lg:hidden col-span-1">
             <button
-              onClick={() => setAppliedMaxPrice(maxPriceInput)}
-              className="col-span-2 bg-black text-white rounded-xl flex items-center justify-center gap-2"
+              onClick={() => setShowFilters(true)}
+              className="w-full bg-white py-4 rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center gap-2 font-bold text-gray-900"
             >
-              Apply <ArrowRight size={16} />
+              <SlidersHorizontal size={20} /> Show Filters
             </button>
+          </div>
+
+          {/* CAR GRID */}
+          <div className="lg:col-span-3">
+            {filteredCars.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border dashed border-gray-200">
+                <p className="text-gray-500 text-lg">No cars found matching your criteria.</p>
+                <button onClick={() => { setBrand("All"); setFuel("All"); setSearch(""); setAppliedMaxPrice(null) }} className="mt-4 text-blue-600 font-bold hover:underline">Clear all filters</button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredCars.map((car) => (
+                  <div
+                    key={car._id}
+                    onClick={() => handleBookNow(car._id)}
+                    className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
+                  >
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden bg-gray-100">
+                      <img
+                        src={getCarImage(car)}
+                        alt={car.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                        {car.brand}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900 font-display">{car.name}</h2>
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                            <span className="bg-gray-100 px-2 py-0.5 rounded flex items-center gap-1"><Settings size={12} /> {car.transmission}</span>
+                            <span className="bg-gray-100 px-2 py-0.5 rounded flex items-center gap-1"><Fuel size={12} /> {car.fuelType}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
+                        <div>
+                          <p className="text-xl font-bold text-blue-600">₹{car.pricePerDay.toLocaleString()}</p>
+                          <p className="text-xs text-gray-400">per day</p>
+                        </div>
+                        <button className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                          <ArrowRight size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* MOBILE FILTER MODAL – SAME UI */}
+      {/* MOBILE FILTER DRAWER */}
       {showFilters && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-end">
-          <div className="w-full bg-white/90 backdrop-blur-xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <Filter size={18} /> Filters
-              </h3>
-              <button onClick={() => setShowFilters(false)}>✕</button>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-end">
+          <div className="w-full max-w-xs bg-white h-full p-6 overflow-y-auto animate-slide-left">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold font-display">Filters</h2>
+              <button onClick={() => setShowFilters(false)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+                <X size={20} />
+              </button>
             </div>
 
-            {/* SAME FILTER CONTENT */}
-            <div className="grid gap-4">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="space-y-8">
+              {/* Search */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-500 uppercase">Search</label>
                 <input
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border rounded-xl"
-                  placeholder="Search by name or brand..."
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl"
+                  placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
 
-              <div className="relative">
-                <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <select
-                  className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                >
-                  {brands.map((b) => (
-                    <option key={b}>{b}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="relative">
-                <Fuel className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <select
-                  className="w-full pl-11 pr-8 py-3 bg-gray-50 border rounded-xl"
-                  value={fuel}
-                  onChange={(e) => setFuel(e.target.value)}
-                >
-                  {fuels.map((f) => (
-                    <option key={f}>{f}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  placeholder="Max Price"
-                  className="w-full pl-8 pr-4 py-3 bg-gray-50 border rounded-xl"
-                  value={maxPriceInput}
-                  onChange={(e) => setMaxPriceInput(e.target.value)}
-                />
+              {/* Brand */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-500 uppercase">Brand</label>
+                <div className="relative">
+                  <select
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    className="w-full appearance-none bg-gray-50 border border-gray-100 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium transition cursor-pointer"
+                  >
+                    {brands.map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <button
-                onClick={() => {
-                  setAppliedMaxPrice(maxPriceInput);
-                  setShowFilters(false);
-                }}
-                className="w-full bg-black text-white py-3 rounded-xl flex items-center justify-center gap-2"
+                onClick={() => setShowFilters(false)}
+                className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200"
               >
-                Apply Filters <ArrowRight size={18} />
+                Show Results
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* CAR GRID */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        {filteredCars.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="inline-flex p-4 bg-gray-100 rounded-full text-gray-400 mb-4">
-              <AlertCircle size={48} />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">No cars found</h3>
-            <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
-            <button onClick={() => { setSearch(""); setBrand("All"); setFuel("All"); setAppliedMaxPrice(null); }} className="mt-6 text-blue-600 font-medium hover:underline">Clear all filters</button>
-          </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCars.map((car) => (
-              <div
-                key={car._id}
-                className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
-              >
-                {/* IMAGE AREA */}
-                <div className="relative h-64 overflow-hidden bg-gray-100">
-                  <img
-                    src={getCarImage(car)}
-                    alt={car.name}
-                    onClick={() => handleBookNow(car._id)}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 cursor-pointer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
-                    {car.brand}
-                  </div>
-                </div>
-
-                {/* CONTENT */}
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900 font-display leading-tight">{car.name}</h2>
-                      <p className="text-sm text-gray-500 mt-1">{car.brand} Series</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-blue-600">₹{car.pricePerDay.toLocaleString()}</p>
-                      <p className="text-xs text-gray-400">/ day</p>
-                    </div>
-                  </div>
-
-                  {/* SPECS */}
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <span className="flex items-center gap-1.5"><Fuel size={16} className="text-blue-500" /> {car.fuelType}</span>
-                    <span className="w-px h-4 bg-gray-300"></span>
-                    <span className="flex items-center gap-1.5"><Settings size={16} className="text-blue-500" /> {car.transmission}</span>
-                    <span className="w-px h-4 bg-gray-300"></span>
-                    <span className="flex items-center gap-1.5"><Zap size={16} className="text-blue-500" /> {car.seats} Seats</span>
-                  </div>
-
-                  <div className="mt-auto pt-4 border-t border-gray-100">
-                    <button
-                      onClick={() => handleBookNow(car._id)}
-                      className="w-full py-3 bg-black text-white rounded-xl font-medium flex items-center justify-center gap-2 group-hover:bg-blue-600 transition-colors"
-                    >
-                      Book Now <ArrowRight size={18} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 };
+
 export default Cars;

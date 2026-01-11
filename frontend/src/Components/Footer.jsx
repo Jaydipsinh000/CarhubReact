@@ -45,6 +45,9 @@ const Footer = () => {
           <p className="text-gray-300">📍 Ahmedabad, India</p>
           <p className="text-gray-300">📞 +91 98765 43210</p>
           <p className="text-gray-300">✉ support@carent.com</p>
+          <div className="mt-4">
+            <Link to="/terms" className="text-sm text-gray-400 hover:text-white transition underline">Terms & Conditions</Link>
+          </div>
         </div>
       </div>
 

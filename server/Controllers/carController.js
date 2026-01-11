@@ -8,7 +8,7 @@ export const addCar = async (req, res) => {
   try {
     const { name, brand, pricePerDay, fuelType, seats, transmission } = req.body;
 
-    const images = req.files?.map((file) => `/uploads/${file.filename}`);
+    const images = req.files?.map((file) => `/uploads/${file.filename}`.replace(/\\/g, "/"));
 
     if (!images || images.length === 0) {
       return res.status(400).json({
@@ -57,7 +57,7 @@ export const updateCar = async (req, res) => {
     const { id } = req.params;
 
     if (req.files && req.files.length > 0) {
-      req.body.images = req.files.map((file) => `/uploads/${file.filename}`);
+      req.body.images = req.files.map((file) => `/uploads/${file.filename}`.replace(/\\/g, "/"));
     }
 
     const updatedCar = await Car.findByIdAndUpdate(id, req.body, {

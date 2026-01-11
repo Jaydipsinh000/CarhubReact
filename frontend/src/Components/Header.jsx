@@ -213,7 +213,7 @@ const Header = () => {
                 </button>
 
                 <button
-                  onClick={() => closeMenuAndNavigate("/bookings")}
+                  onClick={() => closeMenuAndNavigate("/my-bookings")}
                   className="mobile-btn"
                 >
                   🚗 My Bookings

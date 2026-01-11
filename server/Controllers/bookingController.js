@@ -20,9 +20,15 @@ export const createBooking = async (req, res) => {
     if (!carId || !startDate || !endDate)
       return res.status(400).json({ message: "Missing booking details" });
 
+    // Verify user exists from middleware
+    if (!req.user || !req.user._id) {
+      console.error("Booking Error: User not found in request");
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const booking = await Booking.create({
       carId,
-      user: req.user._id || req.user.id, // Ensure user ID is saved
+      user: req.user._id, // User is attached by authUser middleware
       startDate,
       endDate,
       amount,
@@ -35,6 +41,8 @@ export const createBooking = async (req, res) => {
       emergencyName,
       emergencyPhone,
     });
+
+    console.log("Booking Created:", booking._id);
 
     // Block dates immediately
     await Car.findByIdAndUpdate(carId, {
@@ -49,8 +57,8 @@ export const createBooking = async (req, res) => {
 
     res.status(201).json({ booking });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Booking failed" });
+    console.error("Booking Creation Error:", err);
+    res.status(500).json({ message: "Booking failed", error: err.message });
   }
 };
 

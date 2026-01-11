@@ -12,10 +12,18 @@ csv-parser
 razorpay
 
 //Frontend
-react router dom
+react-router-dom
 axios
 tailwindcss @tailwindcss/vite -D
 @reduxjs/toolkit 
 react-redux
 react-datepicker
 recharts
+@react-oauth/google
+jwt-decode
+firebase
+framer-motion
+lucide-react
+react-toastify
+clsx
+tailwind-merge

@@ -14,6 +14,7 @@ import VerifyOtp from "./Pages/VerifyOtp.jsx";
 import Profile from "./Pages/Profile.jsx";
 import Cars from "./Pages/Cars.jsx";
 import CarDetails from "./Pages/CarDetails.jsx";
+import Terms from "./Pages/Terms.jsx";
 
 // Admin
 import AdminDashboard from "./admin/AdminDashboard.jsx";
@@ -42,12 +43,13 @@ const App = () => {
   }, []);
 
   // 🔐 Hide header/footer on admin routes
-  const isAdminRoute = location.pathname.startsWith("/admin");
+  // 🔐 Hide header/footer on admin routes or standalone pages
+  const isStandalone = location.pathname.startsWith("/admin") || location.pathname === "/terms";
 
   return (
     <>
-      {/* ❌ No Header for Admin */}
-      {!isAdminRoute && <Header user={user} setUser={setUser} />}
+      {/* ❌ No Header for Admin/Standalone */}
+      {!isStandalone && <Header user={user} setUser={setUser} />}
 
       <Routes>
         {/* ===== PUBLIC ROUTES ===== */}
@@ -62,6 +64,7 @@ const App = () => {
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/book/:id" element={<BookCar />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/terms" element={<Terms />} />
 
         {/* ===== ADMIN ROUTES ===== */}
         <Route
@@ -128,7 +131,7 @@ const App = () => {
             </AdminRoute>
           }
         />
-          <Route
+        <Route
           path="/admin/bookings"
           element={
             <AdminRoute>
@@ -138,7 +141,7 @@ const App = () => {
             </AdminRoute>
           }
         />
-          <Route
+        <Route
           path="/admin/payments"
           element={
             <AdminRoute>
@@ -150,8 +153,8 @@ const App = () => {
         />
       </Routes>
 
-      {/* ❌ No Footer for Admin */}
-      {!isAdminRoute && <Footer />}
+      {/* ❌ No Footer for Admin/Standalone */}
+      {!isStandalone && <Footer />}
     </>
   );
 };
