@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
@@ -217,8 +217,8 @@ const BookCar = () => {
               <div className="flex items-center gap-4 border-b border-gray-100 pb-6 mb-8">
                 <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl">2</div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">License & Safety</h2>
-                  <p className="text-sm text-gray-500">Required for insurance validation</p>
+                  <h2 className="text-xl font-bold text-gray-900">License Information</h2>
+                  <p className="text-sm text-gray-500">Enter your driving license details</p>
                 </div>
               </div>
 

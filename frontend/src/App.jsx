@@ -42,6 +42,8 @@ import SellerAddCar from "./seller/SellerAddCar.jsx";
 import SellerUpdateCar from "./seller/SellerUpdateCar.jsx";
 import SellerBookings from "./seller/SellerBookings.jsx";
 
+import ScrollToTop from "./Components/ScrollToTop.jsx";
+
 const App = () => {
   const [user, setUser] = useState(null);
   const location = useLocation();
@@ -61,6 +63,7 @@ const App = () => {
 
   return (
     <>
+      <ScrollToTop />
       {/* ❌ No Header for Admin/Standalone */}
       {!isStandalone && <Header user={user} setUser={setUser} />}
 

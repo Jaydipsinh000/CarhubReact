@@ -1,131 +1,116 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Users, Car, MapPin, Award, ArrowRight } from "lucide-react";
 
 const About = () => {
   return (
-    <div className="bg-gray-50">
+    <div className="bg-white overflow-hidden">
       {/* HERO SECTION */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-24 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            About <span className="text-yellow-300">CarRent</span>
-          </h1>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto opacity-90">
-            Your trusted partner for premium, affordable, and reliable car rentals —
-            anytime, anywhere.
-          </p>
-        </div>
-      </section>
-
-      {/* ABOUT CONTENT */}
-      <section className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-14 items-center">
-        {/* LEFT */}
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            Who We Are
-          </h2>
-          <p className="text-gray-600 leading-relaxed mb-4">
-            <strong>CarRent</strong> is a modern car rental platform built to make
-            traveling simple, comfortable, and affordable. Whether you need a
-            compact car for city travel or a luxury vehicle for special occasions,
-            we provide a wide range of well-maintained vehicles to meet every need.
-          </p>
-          <p className="text-gray-600 leading-relaxed">
-            With transparent pricing, verified vehicles, and seamless booking,
-            CarRent ensures a stress-free rental experience backed by trusted
-            customer support.
-          </p>
-        </div>
-
-        {/* RIGHT */}
-        <div className="rounded-xl overflow-hidden shadow-lg">
+      <section className="relative h-[60vh] flex items-center justify-center">
+        <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1503376780353-7e6692767b70"
-            alt="Car Rental"
+            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1966&auto=format&fit=crop"
+            alt="About Hero"
             className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        </div>
+
+        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto space-y-6">
+          <span className="text-blue-400 font-bold tracking-widest uppercase text-sm">Our Story</span>
+          <h1 className="text-5xl md:text-7xl font-bold font-display leading-tight">
+            Redefining the <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white">Art of Driving</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-300 font-light">
+            We believe every journey should be an experience. From the roar of the engine to the comfort of the cabin, we curate moments, not just rentals.
+          </p>
         </div>
       </section>
 
-      {/* MISSION / VISION */}
-      <section className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12">
-          <div className="p-8 rounded-xl border hover:shadow-md transition">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-              Our Mission
-            </h3>
-            <p className="text-gray-600 leading-relaxed">
-              To redefine car rentals by delivering safe, affordable, and premium
-              mobility solutions powered by technology and trust.
-            </p>
+      {/* STATS SECTION */}
+      <section className="py-12 bg-white -mt-20 relative z-20 container mx-auto px-4">
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-x divide-gray-100">
+          <div className="space-y-2">
+            <h3 className="text-4xl md:text-5xl font-bold text-blue-600">50+</h3>
+            <p className="text-gray-500 font-medium">Premium Vehicles</p>
           </div>
-
-          <div className="p-8 rounded-xl border hover:shadow-md transition">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-              Our Vision
-            </h3>
-            <p className="text-gray-600 leading-relaxed">
-              To become India’s most reliable and customer-centric car rental
-              platform, making transportation accessible to everyone.
-            </p>
+          <div className="space-y-2">
+            <h3 className="text-4xl md:text-5xl font-bold text-blue-600">10k+</h3>
+            <p className="text-gray-500 font-medium">Happy Journeys</p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-4xl md:text-5xl font-bold text-blue-600">5</h3>
+            <p className="text-gray-500 font-medium">Years Excellence</p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-4xl md:text-5xl font-bold text-blue-600">24/7</h3>
+            <p className="text-gray-500 font-medium">Roadside Support</p>
           </div>
         </div>
       </section>
 
-      {/* WHY CHOOSE US */}
-      <section className="bg-gray-50 py-20">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-12">
-            Why Choose CarRent
-          </h2>
+      {/* VISION & MISSION */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="order-2 md:order-1 relative">
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+              <img
+                src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2072&auto=format&fit=crop"
+                alt="Our Vision"
+                className="rounded-3xl shadow-2xl relative z-10 w-full object-cover h-[500px]"
+              />
+              <div className="absolute -bottom-10 -right-10 w-60 h-60 bg-purple-100 rounded-full blur-3xl opacity-50"></div>
+            </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              {
-                title: "Verified Cars",
-                desc: "Every vehicle is inspected and maintained for safety.",
-              },
-              {
-                title: "Affordable Pricing",
-                desc: "Transparent pricing with no hidden charges.",
-              },
-              {
-                title: "Easy Booking",
-                desc: "Book your car in minutes with our simple platform.",
-              },
-              {
-                title: "24/7 Support",
-                desc: "We’re always here when you need assistance.",
-              },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition"
-              >
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                  {item.title}
-                </h4>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
+            <div className="order-1 md:order-2 space-y-8">
+              <div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">Driven by Passion</h2>
+                <p className="text-gray-500 text-lg leading-relaxed">
+                  Carent was born from a simple idea: Luxury shouldn't be inaccessible. We wanted to create a platform where anyone could experience the thrill of driving their dream car without the burdens of ownership.
+                </p>
               </div>
-            ))}
+
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                    <Award size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-900">Excellence First</h4>
+                    <p className="text-gray-500">We never compromise on the quality of our fleet. Every car is vetted for perfection.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                    <Users size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-900">Customer Centric</h4>
+                    <p className="text-gray-500">Your journey matters. From booking to drop-off, we ensure a seamless experience.</p>
+                  </div>
+                </div>
+              </div>
+
+              <Link to="/contact" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all">
+                Join our journey <ArrowRight size={20} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-blue-700 text-white py-16">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to Start Your Journey?
-          </h2>
-          <p className="mb-6 text-lg opacity-90">
-            Explore our wide range of cars and book your ride today.
-          </p>
+      <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8">Experience the Difference</h2>
           <Link
             to="/cars"
-            className="inline-block bg-white text-blue-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+            className="inline-block px-10 py-4 bg-white text-black font-bold rounded-full hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105 shadow-xl"
           >
-            Browse Cars
+            Explore Our Fleet
           </Link>
         </div>
       </section>
