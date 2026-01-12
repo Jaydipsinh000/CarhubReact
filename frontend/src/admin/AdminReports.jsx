@@ -1,129 +1,221 @@
-import React, { useEffect, useState } from "react";
-import AdminLayout from "./AdminLayout";
-import { getAdminStats } from "../Services/adminApi";
-import { Printer, Download, TrendingUp, Users, Car, Calendar } from "lucide-react";
+import React, { useState } from 'react';
+import AdminLayout from './AdminLayout';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { Download, Printer, Calendar, TrendingUp, Users, DollarSign } from 'lucide-react';
 
 const AdminReports = () => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [dateRange, setDateRange] = useState('6m');
 
-    useEffect(() => {
-        getAdminStats()
-            .then((res) => setData(res.data))
-            .catch(console.error)
-            .finally(() => setLoading(false));
-    }, []);
+    // Mock Data for Reports - In a real app, fetch from API based on dateRange
+    const revenueData = [
+        { name: 'Jan', revenue: 12000, expenses: 8000 },
+        { name: 'Feb', revenue: 21000, expenses: 12000 },
+        { name: 'Mar', revenue: 15000, expenses: 9000 },
+        { name: 'Apr', revenue: 36000, expenses: 20000 },
+        { name: 'May', revenue: 30000, expenses: 18000 },
+        { name: 'Jun', revenue: 48000, expenses: 25000 },
+    ];
+
+    const userGrowthData = [
+        { name: 'Jan', users: 120, active: 80 },
+        { name: 'Feb', users: 180, active: 110 },
+        { name: 'Mar', users: 250, active: 160 },
+        { name: 'Apr', users: 310, active: 200 },
+        { name: 'May', users: 400, active: 280 },
+        { name: 'Jun', users: 520, active: 390 },
+    ];
 
     const handlePrint = () => {
         window.print();
     };
 
     const handleDownloadCSV = () => {
-        // Basic CSV download logic for bookings
-        if (!data?.recentBookings) return;
+        const headers = ["Month", "Revenue", "Expenses"];
+        const csvContent = [
+            headers.join(","),
+            ...revenueData.map(row => `${row.name},${row.revenue},${row.expenses}`)
+        ].join("\n");
 
-        const headers = ["Booking ID,Customer,Car,Amount,Date,Status\n"];
-        const rows = data.recentBookings.map(b =>
-            `${b._id},${b.fullName},${b.carId?.name || 'Unknown'},${b.amount},${new Date(b.createdAt).toLocaleDateString()},${b.paymentStatus}`
-        );
-
-        const csvContent = "data:text/csv;charset=utf-8," + headers + rows.join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "carent_report.csv");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'revenue_report.csv');
+        link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     };
-
-    if (loading) return <AdminLayout><div className="p-10 text-center">Generated Report...</div></AdminLayout>;
 
     return (
         <AdminLayout>
-            <div className="max-w-4xl mx-auto space-y-8 pb-10 print:p-0 print:max-w-none">
-
-                {/* HEADER ACTIONS */}
-                <div className="flex justify-between items-center print:hidden">
+            <div className="space-y-8 pb-10 print:p-0 print:max-w-none">
+                {/* Header for Screen */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 font-display">System Reports</h1>
-                        <p className="text-gray-500">Generate and export platform analytics.</p>
+                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight font-display">
+                            System Reports
+                        </h1>
+                        <p className="text-gray-500 mt-1">
+                            Detailed analysis of platform performance
+                        </p>
                     </div>
-                    <div className="flex gap-3">
-                        <button onClick={handleDownloadCSV} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm transition">
-                            <Download size={18} /> Export CSV
+                    <div className="flex items-center gap-3">
+                        <select
+                            value={dateRange}
+                            onChange={(e) => setDateRange(e.target.value)}
+                            className="bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 shadow-sm"
+                        >
+                            <option value="1m">Last 30 Days</option>
+                            <option value="6m">Last 6 Months</option>
+                            <option value="1y">Last Year</option>
+                        </select>
+                        <button
+                            onClick={handleDownloadCSV}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition shadow-sm"
+                        >
+                            <Download size={16} /> Export CSV
                         </button>
-                        <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md transition">
-                            <Printer size={18} /> Print Report
+                        <button
+                            onClick={handlePrint}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+                        >
+                            <Printer size={16} /> Print Report
                         </button>
                     </div>
                 </div>
 
-                {/* PRINTABLE AREA */}
-                <div className="bg-white shadow-xl rounded-2xl p-10 border border-gray-100 print:shadow-none print:border-none">
+                {/* Print Header */}
+                <div className="hidden print:block mb-8">
+                    <h1 className="text-2xl font-bold text-black">Carent Admin Report</h1>
+                    <p className="text-gray-600">Generated on {new Date().toLocaleDateString()}</p>
+                </div>
 
-                    {/* REPORT HEADER */}
-                    <div className="border-b border-gray-100 pb-8 mb-8 flex justify-between items-start">
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Carent Monthly Performance</h2>
-                            <p className="text-gray-500 text-sm mt-1">Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}</p>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-3xl font-bold text-blue-600">CarRent Admin</div>
-                            <div className="text-sm text-gray-400">confidential internal report</div>
-                        </div>
-                    </div>
-
-                    {/* KEY METRICS GRID */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="flex items-center gap-2 text-gray-500 text-sm mb-1"><Users size={16} /> Total Users</div>
-                            <div className="text-2xl font-bold text-gray-900">{data.totalUsers}</div>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="flex items-center gap-2 text-gray-500 text-sm mb-1"><Car size={16} /> Fleet Size</div>
-                            <div className="text-2xl font-bold text-gray-900">{data.totalCars}</div>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="flex items-center gap-2 text-gray-500 text-sm mb-1"><Calendar size={16} /> Bookings</div>
-                            <div className="text-2xl font-bold text-gray-900">{data.totalBookings}</div>
-                        </div>
-                        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                            <div className="flex items-center gap-2 text-emerald-700 text-sm mb-1"><TrendingUp size={16} /> Revenue (Est)</div>
-                            <div className="text-2xl font-bold text-emerald-700">
-                                ₹{(data.monthlyStats?.reduce((acc, curr) => acc + curr.revenue, 0) || 0).toLocaleString()}
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm print:border-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-green-50 text-green-600 rounded-xl">
+                                <DollarSign size={24} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500 font-medium">Net Revenue</p>
+                                <h3 className="text-2xl font-bold text-gray-900">₹1,62,000</h3>
+                                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                                    <TrendingUp size={12} /> +12.5% from last period
+                                </p>
                             </div>
                         </div>
                     </div>
-
-                    {/* REVENUE TABLE */}
-                    <div className="mb-10">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4">Revenue Breakdown (Last 6 Months)</h3>
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-gray-200">
-                                    <th className="py-2 text-sm font-semibold text-gray-600">Month</th>
-                                    <th className="py-2 text-sm font-semibold text-gray-600 text-right">Bookings</th>
-                                    <th className="py-2 text-sm font-semibold text-gray-600 text-right">Revenue</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {data.monthlyStats?.map((m, i) => (
-                                    <tr key={i} className="border-b border-gray-100">
-                                        <td className="py-3 text-sm text-gray-900">{m.name}</td>
-                                        <td className="py-3 text-sm text-gray-600 text-right">{m.bookings}</td>
-                                        <td className="py-3 text-sm font-bold text-gray-900 text-right">₹{m.revenue.toLocaleString()}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm print:border-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                                <Users size={24} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500 font-medium">Total Users</p>
+                                <h3 className="text-2xl font-bold text-gray-900">1,782</h3>
+                                <p className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                                    <TrendingUp size={12} /> +8.2% new registrations
+                                </p>
+                            </div>
+                        </div>
                     </div>
-
-                    {/* FOOTER */}
-                    <div className="mt-12 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
-                        End of Report • Carent Inc. • Printed by Admin
+                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm print:border-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                                <Calendar size={24} />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500 font-medium">Total Bookings</p>
+                                <h3 className="text-2xl font-bold text-gray-900">54</h3>
+                                <p className="text-xs text-purple-600 flex items-center gap-1 mt-1">
+                                    <TrendingUp size={12} /> +15.3% occupancy rate
+                                </p>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
+
+                {/* Financial Chart */}
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm print:break-inside-avoid print:border-gray-300">
+                    <h2 className="text-lg font-bold text-gray-900 mb-6">Financial Overview</h2>
+                    <div className="h-[350px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                                <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val / 1000}k`} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    formatter={(value) => [`₹${value.toLocaleString()}`, ""]}
+                                />
+                                <Legend />
+                                <Area type="monotone" dataKey="revenue" stackId="1" stroke="#10b981" fill="url(#colorRevenue2)" name="Revenue" strokeWidth={3} />
+                                <Area type="monotone" dataKey="expenses" stackId="1" stroke="#ef4444" fill="url(#colorExpenses)" name="Expenses" strokeWidth={3} />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Growth Chart */}
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm print:break-inside-avoid print:border-gray-300">
+                    <h2 className="text-lg font-bold text-gray-900 mb-6">User Growth & Activity</h2>
+                    <div className="h-[350px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={userGrowthData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                                <YAxis axisLine={false} tickLine={false} />
+                                <Tooltip
+                                    cursor={{ fill: '#F3F4F6' }}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                />
+                                <Legend />
+                                <Bar dataKey="users" name="Total Users" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={30} />
+                                <Bar dataKey="active" name="Active Users" fill="#60a5fa" radius={[4, 4, 0, 0]} barSize={30} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Detailed Table for Print */}
+                <div className="bg-white rounded-xl border border-gray-200 mt-8 overflow-hidden print:border-gray-300">
+                    <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                        <h3 className="font-bold text-gray-900">Detailed Financial Data</h3>
+                    </div>
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 font-medium text-gray-500">Period</th>
+                                <th className="px-6 py-3 font-medium text-gray-500">Revenue</th>
+                                <th className="px-6 py-3 font-medium text-gray-500">Expenses</th>
+                                <th className="px-6 py-3 font-medium text-gray-500">Net Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {revenueData.map((row) => (
+                                <tr key={row.name}>
+                                    <td className="px-6 py-3 font-medium text-gray-900">{row.name}</td>
+                                    <td className="px-6 py-3 text-green-600">₹{row.revenue.toLocaleString()}</td>
+                                    <td className="px-6 py-3 text-red-500">₹{row.expenses.toLocaleString()}</td>
+                                    <td className="px-6 py-3 font-bold text-gray-900">₹{(row.revenue - row.expenses).toLocaleString()}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </AdminLayout>
     );

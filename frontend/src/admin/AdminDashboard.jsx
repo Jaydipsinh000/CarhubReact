@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAdminStats } from "../Services/adminApi.js";
 import AdminLayout from "./AdminLayout.jsx";
+import { getCarImage } from "../utils/imageUtils";
 import {
   AreaChart,
   Area,
@@ -16,12 +17,12 @@ import {
 } from "recharts";
 import {
   Car,
-  AlertCircle,
-  Package,
   Users,
   TrendingUp,
   Calendar,
-  ArrowUpRight,
+  ArrowRight,
+  DollarSign,
+  Activity,
 } from "lucide-react";
 
 const COLORS = ["#10b981", "#ef4444"];
@@ -53,12 +54,8 @@ const AdminDashboard = () => {
       value: `₹${(
         data.monthlyStats?.reduce((acc, curr) => acc + curr.revenue, 0) || 0
       ).toLocaleString()}`,
-      desc: "Last 6 months",
-      icon: () => (
-        <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
-          ₹
-        </div>
-      ),
+      desc: "Total earnings",
+      icon: DollarSign,
       color: "bg-emerald-500",
       bg: "bg-emerald-50",
       text: "text-emerald-600",
@@ -87,7 +84,7 @@ const AdminDashboard = () => {
     {
       title: "Total Users",
       value: data.totalUsers || 0,
-      desc: "Active customers",
+      desc: "Registered users",
       icon: Users,
       color: "bg-orange-500",
       bg: "bg-orange-50",
@@ -97,7 +94,6 @@ const AdminDashboard = () => {
   ];
 
   /* CHART DATA */
-  // Use real monthly stats or fallback to mock if empty (for initial view)
   const chartData =
     data.monthlyStats?.length > 0
       ? data.monthlyStats
@@ -128,11 +124,12 @@ const AdminDashboard = () => {
               Dashboard Overview
             </h1>
             <p className="text-gray-500 mt-1">
-              Welcome back, here's what's happening today.
+              Welcome back! Here's your daily performance summary.
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+            <span className="text-sm text-gray-500 font-medium bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+              <Calendar size={14} className="text-gray-400" />
               {new Date().toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -142,9 +139,9 @@ const AdminDashboard = () => {
             </span>
             <button
               onClick={() => navigate("/admin/reports")}
-              className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-lg"
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-lg flex items-center gap-2"
             >
-              View Reports
+              <Activity size={16} /> View Reports
             </button>
           </div>
         </div>
@@ -157,17 +154,17 @@ const AdminDashboard = () => {
               className="group bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden"
             >
               <div
-                className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 ${card.bg.replace(
+                className={`absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 transition-transform group-hover:scale-110 ${card.bg.replace(
                   "bg-",
                   "bg-"
                 )}`}
               />
 
               <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-xl ${card.bg} ${card.text}`}>
+                <div className={`p-3 rounded-xl ${card.bg} ${card.text} ring-1 ring-inset ring-black/5`}>
                   <card.icon size={24} />
                 </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
                   {card.trend} <TrendingUp size={12} />
                 </div>
               </div>
@@ -183,7 +180,6 @@ const AdminDashboard = () => {
                 <p className="text-gray-500 text-sm font-medium mt-1">
                   {card.title}
                 </p>
-                <p className="text-xs text-gray-400 mt-2">{card.desc}</p>
               </div>
             </div>
           ))}
@@ -191,20 +187,17 @@ const AdminDashboard = () => {
 
         {/* CHARTS SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* AREA CHART - REVENUE/BOOKINGS */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          {/* AREA CHART */}
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 font-display">
-                  Revenue Trend
+                <h2 className="text-lg font-bold text-gray-900 font-display">
+                  Revenue Analytics
                 </h2>
                 <p className="text-sm text-gray-500">
-                  Income over the last 6 months
+                  Income trends over the past 6 months
                 </p>
               </div>
-              <button className="text-sm text-blue-600 font-medium hover:bg-blue-50 px-3 py-1 rounded-lg transition">
-                View Report
-              </button>
             </div>
 
             <div className="h-[300px] w-full">
@@ -214,45 +207,32 @@ const AdminDashboard = () => {
                   margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
                   <defs>
-                    <linearGradient
-                      id="colorRevenue"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#E5E7EB"
-                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#6B7280", fontSize: 12, fontWeight: 500 }}
+                    tick={{ fill: "#6b7280", fontSize: 12, fontWeight: 500 }}
                     dy={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: "#6B7280", fontSize: 12 }}
+                    tick={{ fill: "#6b7280", fontSize: 12 }}
                     tickFormatter={(value) => `₹${value / 1000}k`}
                   />
                   <Tooltip
                     contentStyle={{
                       borderRadius: "12px",
-                      border: "none",
+                      border: "1px solid #e5e7eb",
                       boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                     }}
-                    formatter={(value) => [
-                      `₹${value.toLocaleString()}`,
-                      "Revenue",
-                    ]}
+                    formatter={(value) => [`₹${value.toLocaleString()}`, "Revenue"]}
                   />
                   <Area
                     type="monotone"
@@ -261,32 +241,23 @@ const AdminDashboard = () => {
                     strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#colorRevenue)"
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* PIE CHART - FLEET STATUS */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-            <h2 className="text-xl font-bold text-gray-900 font-display mb-2">
+          {/* PIE CHART */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col">
+            <h2 className="text-lg font-bold text-gray-900 font-display mb-1">
               Fleet Status
             </h2>
             <p className="text-sm text-gray-500 mb-6">
-              Vehicle availability overview
+              Real-time vehicle availability
             </p>
 
-            <div className="h-[250px] w-full flex items-center justify-center relative">
-              {/* Center Text */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-3xl font-bold text-gray-900">
-                  {data.totalCars || 0}
-                </span>
-                <span className="text-xs text-gray-400 uppercase tracking-widest">
-                  Total
-                </span>
-              </div>
-
+            <div className="flex-1 min-h-[250px] relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -313,123 +284,134 @@ const AdminDashboard = () => {
                   />
                 </PieChart>
               </ResponsiveContainer>
+
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-3xl font-bold text-gray-900">
+                  {data.totalCars || 0}
+                </span>
+                <span className="text-xs text-gray-400 uppercase tracking-widest font-medium">
+                  Total Cars
+                </span>
+              </div>
             </div>
 
             <div className="space-y-3 mt-6">
-              <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
+              <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Available
-                  </span>
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-sm font-medium text-gray-700">Available</span>
                 </div>
-                <span className="text-sm font-bold text-gray-900">
-                  {carPieData[0].value}
-                </span>
+                <span className="text-sm font-bold text-gray-900">{carPieData[0].value}</span>
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
+              <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500" />
-                  <span className="text-sm font-medium text-gray-700">
-                    Unavailable
-                  </span>
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                  <span className="text-sm font-medium text-gray-700">Unavailable</span>
                 </div>
-                <span className="text-sm font-bold text-gray-900">
-                  {carPieData[1].value}
-                </span>
+                <span className="text-sm font-bold text-gray-900">{carPieData[1].value}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* RECENT BOOKINGS TABLE */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
             <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                Recent Bookings
+              <h2 className="text-lg font-bold text-gray-900 font-display">
+                Recent Activity
               </h2>
               <p className="text-sm text-gray-500">
-                Latest transactions from users
+                Latest transactions and property bookings
               </p>
             </div>
-            <button className="flex items-center gap-1 text-sm text-blue-600 font-medium hover:underline">
-              View All <ArrowUpRight size={16} />
+            <button
+              onClick={() => navigate('/admin/bookings')}
+              className="text-sm text-blue-600 font-medium hover:bg-blue-50 px-4 py-2 rounded-lg transition flex items-center gap-1"
+            >
+              View All <ArrowRight size={16} />
             </button>
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-gray-500">
-              Loading bookings...
+            <div className="p-12 text-center text-gray-500">
+              <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+              Loading activity...
             </div>
           ) : data.recentBookings?.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-12 text-center text-gray-500">
               No recent bookings found.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50/50">
+                <thead className="bg-gray-50/50 border-b border-gray-100">
                   <tr className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-4">Customer</th>
-                    <th className="px-6 py-4">Vehicle</th>
-                    <th className="px-6 py-4">Dates</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">Transaction Details</th>
+                    <th className="px-6 py-4">Status & Amount</th>
+                    <th className="px-6 py-4">Customer Info</th>
+                    <th className="px-6 py-4">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {data.recentBookings?.map((booking) => (
                     <tr
                       key={booking._id}
-                      className="hover:bg-blue-50/30 transition-colors"
+                      className="hover:bg-blue-50/30 transition-colors group"
                     >
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center text-xs font-bold">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-12 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
+                            <img
+                              src={getCarImage(booking.carId)}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">
+                              {booking.carId?.name || "Unknown Car"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {booking.carId?.brand}
+                            </p>
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className="text-[10px] text-gray-400">Owner:</span>
+                              <span className="text-[10px] bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-100 font-medium">
+                                {booking.carId?.createdBy?.name || "Admin"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col items-start gap-1">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${booking.paymentStatus === "paid"
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                              : "bg-yellow-50 text-yellow-600 border-yellow-100"
+                              }`}
+                          >
+                            {booking.paymentStatus || "Pending"}
+                          </span>
+                          <span className="font-bold text-gray-900 text-sm">
+                            ₹{booking.amount?.toLocaleString()}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold">
                             {booking.fullName?.charAt(0) || "U"}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {booking.fullName}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {booking.phone}
-                            </p>
+                            <p className="text-sm font-medium text-gray-900">{booking.fullName}</p>
+                            <p className="text-xs text-gray-400">{booking.phone}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-800">
-                          {booking.carId?.name || "Unknown Car"}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {booking.carId?.brand}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-xs text-gray-600 space-y-1">
-                          <p>
-                            From:{" "}
-                            {new Date(booking.startDate).toLocaleDateString()}
-                          </p>
-                          <p>
-                            To: {new Date(booking.endDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 font-bold text-gray-900">
-                        ₹{booking.amount?.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium border ${booking.paymentStatus === "paid"
-                            ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                            : "bg-yellow-50 text-yellow-600 border-yellow-100"
-                            }`}
-                        >
-                          {booking.paymentStatus || "Pending"}
-                        </span>
+                      <td className="px-6 py-4 text-xs text-gray-500">
+                        {new Date(booking.startDate).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}

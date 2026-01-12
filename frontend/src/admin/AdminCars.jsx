@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { getCars, deleteCar } from "../Services/adminApi";
 import AdminLayout from "./AdminLayout";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Edit2, Trash2, Car, Fuel, Zap, Settings } from "lucide-react";
-
+import { Plus, Search, Edit2, Trash2, Car, Fuel, Zap, Settings, Download } from "lucide-react";
 import { getCarImage } from "../utils/imageUtils";
 
 const AdminCars = () => {
@@ -45,6 +44,32 @@ const AdminCars = () => {
       car.brand.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleExportCSV = () => {
+    if (!filteredCars.length) return;
+    const headers = ["Name", "Brand", "Year", "Fuel", "Transmission", "Price", "Owner"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredCars.map(car => [
+        `"${car.name}"`,
+        `"${car.brand}"`,
+        car.year,
+        car.fuelType,
+        car.transmission,
+        car.pricePerDay,
+        `"${car.createdBy?.name || 'Admin'}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `cars_inventory_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -52,55 +77,61 @@ const AdminCars = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 tracking-tight font-display">
-              Manage Fleet
+              Vehicle Inventory
             </h1>
             <p className="text-gray-500 mt-1">
-              View and manage your entire vehicle inventory
+              Manage your fleet, add new cars, and update availability.
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={handleExportCSV}
+              className="px-4 py-2 border border-gray-200 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium text-sm flex items-center gap-2"
+            >
+              <Download size={16} /> Export CSV
+            </button>
             <button
               onClick={() => navigate("/admin/cars/bulk")}
-              className="px-4 py-2 border border-gray-200 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium"
+              className="px-4 py-2 border border-gray-200 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium text-sm"
             >
               Bulk Upload
             </button>
             <button
               onClick={() => navigate("/admin/addCar")}
-              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all font-medium"
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-all font-medium text-sm"
             >
               <Plus size={18} />
-              Add Car
+              Add Vehicle
             </button>
           </div>
         </div>
 
         {/* SEARCH & FILTERS */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Search by car name or brand..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all text-sm"
             />
           </div>
         </div>
 
         {/* TABLE CARD */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           {loading ? (
             <div className="p-12 text-center text-gray-500">
               <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              Loading content...
+              Loading vehicles...
             </div>
           ) : filteredCars.length === 0 ? (
             <div className="p-12 text-center text-gray-500">
               <Car size={48} className="mx-auto mb-4 text-gray-300" />
-              <p>No cars found matching your criteria.</p>
+              <p>No vehicles found matching your criteria.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -156,14 +187,17 @@ const AdminCars = () => {
 
                       <td className="px-6 py-4">
                         {car.createdBy ? (
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{car.createdBy.name}</p>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Partner
-                            </span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center text-[10px] font-bold">
+                              {car.createdBy.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-gray-900">{car.createdBy.name}</p>
+                              <p className="text-[10px] text-gray-500">Partner</p>
+                            </div>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
                             Admin
                           </span>
                         )}
