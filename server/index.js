@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import bookingRoutes from "./Routes/bookingRoutes.js";
 import paymentRoutes from "./Routes/paymentRoutes.js";
 import adminRoutes from "./Routes/adminRoutes.js";
+import sellerRoutes from "./Routes/sellerRoutes.js";
 
 
 
@@ -54,6 +55,7 @@ app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/seller", sellerRoutes);
 
 // Port
 const PORT = process.env.PORT || 5000;
