@@ -6,7 +6,7 @@ import Car from "../Models/Cars.js";
 // =======================
 export const addCar = async (req, res) => {
   try {
-    const { name, brand, pricePerDay, fuelType, seats, transmission, listingType } = req.body;
+    const { name, brand, pricePerDay, fuelType, seats, transmission, listingType, reservationFee } = req.body;
 
     const images = req.files?.map((file) => `/uploads/${file.filename}`.replace(/\\/g, "/"));
 
@@ -32,6 +32,7 @@ export const addCar = async (req, res) => {
       seats,
       transmission,
       listingType: listingType || "Rent",
+      reservationFee: reservationFee ? Number(reservationFee) : 0,
       images,
       bookings: [],
       createdBy: req.user._id, // 🔹 Associate with logged-in user
@@ -109,9 +110,30 @@ export const deleteCar = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to delete this car" });
     }
 
+    // 🔹 Delete images from storage
+    if (car.images && car.images.length > 0) {
+      const fs = await import("fs");
+      const path = await import("path");
+
+      car.images.forEach(imagePath => {
+        // imagePath is like "/uploads/filename.jpg"
+        const filename = imagePath.split("/").pop(); // filename.jpg
+        const filePath = path.join(process.cwd(), "uploads", filename);
+
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Failed to delete file: ${filePath}`, err);
+          } else {
+            console.log(`Deleted file: ${filePath}`);
+          }
+        });
+      });
+    }
+
     await car.deleteOne();
-    res.status(200).json({ message: "Car deleted successfully" });
+    res.status(200).json({ message: "Car and associated images deleted successfully" });
   } catch (error) {
+    console.error("Delete Car Error:", error);
     res.status(500).json({ message: "Car delete failed" });
   }
 };

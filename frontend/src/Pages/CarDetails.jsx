@@ -55,7 +55,11 @@ const CarDetails = () => {
     if (!token) {
       setShowAuthModal(true);
     } else {
-      navigate(`/book/${car._id}`);
+      if (car.listingType === "Sell") {
+        navigate(`/buy/${car._id}`);
+      } else {
+        navigate(`/book/${car._id}`);
+      }
     }
   };
 
@@ -119,7 +123,8 @@ const CarDetails = () => {
                 {car.name}
               </h1>
               <p className="text-3xl font-bold text-gray-900">
-                ₹{car.pricePerDay.toLocaleString()}<span className="text-lg text-gray-400 font-medium font-sans">/day</span>
+                ₹{car.pricePerDay.toLocaleString()}
+                {car.listingType !== "Sell" && <span className="text-lg text-gray-400 font-medium font-sans">/day</span>}
               </p>
             </div>
 
@@ -168,7 +173,7 @@ const CarDetails = () => {
                   onClick={handleBookingClick}
                   className="w-full py-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-transform active:scale-[0.99] flex items-center justify-center gap-2 shadow-lg"
                 >
-                  Book Now <ArrowRight size={18} />
+                  {car.listingType === "Sell" ? "Reserve Now" : "Book Now"} <ArrowRight size={18} />
                 </button>
                 <div className="flex items-center justify-center gap-2 text-xs text-gray-400 font-medium">
                   <Shield size={12} /> Secure transaction via Razorpay
@@ -245,7 +250,10 @@ const CarDetails = () => {
                   <div className="p-4">
                     <h3 className="font-bold text-base text-gray-900 mb-1">{c.name}</h3>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-blue-600 font-bold text-sm">₹{c.pricePerDay.toLocaleString()}/day</span>
+                      <span className="text-blue-600 font-bold text-sm">
+                        ₹{c.pricePerDay.toLocaleString()}
+                        {c.listingType !== "Sell" && <span>/day</span>}
+                      </span>
                       <span className="text-[10px] uppercase font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded">{c.brand}</span>
                     </div>
                   </div>

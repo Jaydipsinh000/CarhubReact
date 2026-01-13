@@ -35,6 +35,12 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "paid"],
       default: "pending",
     },
+
+    orderType: {
+      type: String,
+      enum: ["Rent", "Sale"],
+      default: "Rent",
+    },
   },
   { timestamps: true }
 );

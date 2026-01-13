@@ -232,13 +232,16 @@ const Cars = () => {
 
                       <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
                         <div>
-                          <p className="text-xl font-bold text-blue-600">₹{car.pricePerDay.toLocaleString()}</p>
-                          <p className="text-xs text-gray-400 font-medium">per day</p>
+                          <p className="text-xl font-bold text-blue-600">
+                            ₹{car.pricePerDay.toLocaleString()}
+                            {car.listingType !== "Sell" && <span className="text-xs text-gray-400 font-medium ml-1">/ day</span>}
+                          </p>
                         </div>
                         <button className="h-10 px-5 bg-black text-white rounded-full flex items-center justify-center gap-2 group-hover:bg-blue-600 transition-colors text-sm font-bold shadow-lg">
                           Book Now
                         </button>
                       </div>
+
                     </div>
                   </div>
                 ))}
@@ -249,85 +252,87 @@ const Cars = () => {
       </div>
 
       {/* MOBILE FILTER DRAWER (Bottom Sheet Style) */}
-      {showFilters && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-center items-end lg:items-center">
-          <div className="bg-white w-full lg:w-96 lg:rounded-3xl rounded-t-3xl p-6 md:p-8 animate-slide-up lg:animate-fade-in shadow-2xl max-h-[85vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-8 sticky top-0 bg-white z-10 pb-4 border-b border-gray-100">
-              <h2 className="text-2xl font-bold font-display">Filter Fleet</h2>
-              <button
-                onClick={() => setShowFilters(false)}
-                className="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              {/* Search */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-500 uppercase">Search</label>
-                <input
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none"
-                  placeholder="e.g. Audi"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+      {
+        showFilters && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-center items-end lg:items-center">
+            <div className="bg-white w-full lg:w-96 lg:rounded-3xl rounded-t-3xl p-6 md:p-8 animate-slide-up lg:animate-fade-in shadow-2xl max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-8 sticky top-0 bg-white z-10 pb-4 border-b border-gray-100">
+                <h2 className="text-2xl font-bold font-display">Filter Fleet</h2>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition"
+                >
+                  <X size={20} />
+                </button>
               </div>
 
-              {/* Brand */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-500 uppercase">Brand</label>
-                <div className="relative">
-                  <select
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    className="w-full appearance-none bg-gray-50 border border-gray-100 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium h-12"
-                  >
-                    {brands.map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                    </svg>
+              <div className="space-y-8">
+                {/* Search */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-500 uppercase">Search</label>
+                  <input
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none"
+                    placeholder="e.g. Audi"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+
+                {/* Brand */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-500 uppercase">Brand</label>
+                  <div className="relative">
+                    <select
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                      className="w-full appearance-none bg-gray-50 border border-gray-100 text-gray-700 py-3 px-4 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-medium h-12"
+                    >
+                      {brands.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Price */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-500 uppercase">Max Price / Day</label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    placeholder="e.g. 5000"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none"
-                    value={maxPriceInput}
-                    onChange={(e) => setMaxPriceInput(e.target.value)}
-                  />
+                {/* Price */}
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-500 uppercase">Max Price / Day</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="e.g. 5000"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      value={maxPriceInput}
+                      onChange={(e) => setMaxPriceInput(e.target.value)}
+                    />
+                    <button
+                      onClick={() => setAppliedMaxPrice(maxPriceInput)}
+                      className="bg-black text-white px-4 rounded-xl hover:bg-gray-800 transition active:scale-95"
+                    >
+                      Go
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-4">
                   <button
-                    onClick={() => setAppliedMaxPrice(maxPriceInput)}
-                    className="bg-black text-white px-4 rounded-xl hover:bg-gray-800 transition active:scale-95"
+                    onClick={() => setShowFilters(false)}
+                    className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition active:scale-[0.98]"
                   >
-                    Go
+                    Show {filteredCars.length} Cars
                   </button>
                 </div>
               </div>
-
-              <div className="pt-4">
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition active:scale-[0.98]"
-                >
-                  Show {filteredCars.length} Cars
-                </button>
-              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 

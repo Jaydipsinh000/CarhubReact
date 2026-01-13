@@ -51,6 +51,11 @@ const carSchema = new mongoose.Schema(
       default: "Rent",
     },
 
+    reservationFee: {
+      type: Number,
+      default: 0
+    },
+
     // ✅ NEW: BOOKINGS FOR DATE AVAILABILITY
     bookings: [
       {

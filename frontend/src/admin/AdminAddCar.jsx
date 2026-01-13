@@ -13,7 +13,10 @@ const AdminAddCar = () => {
     pricePerDay: "",
     fuelType: "Petrol",
     seats: "",
+    seats: "",
     transmission: "Manual",
+    listingType: "Rent",
+    reservationFee: "",
     images: [],
   });
 
@@ -50,6 +53,8 @@ const AdminAddCar = () => {
       fd.append("fuelType", formData.fuelType);
       fd.append("seats", Number(formData.seats));
       fd.append("transmission", formData.transmission);
+      fd.append("listingType", formData.listingType);
+      if (formData.listingType === "Sell") fd.append("reservationFee", Number(formData.reservationFee));
 
       formData.images.forEach((img) => fd.append("images", img));
 
@@ -119,6 +124,22 @@ const AdminAddCar = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Listing Type</label>
+                      <select
+                        name="listingType"
+                        value={formData.listingType}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all outline-none"
+                      >
+                        <option value="Rent">Rent</option>
+                        <option value="Sell">Sell</option>
+                      </select>
+                    </div>
+                    {/* Placeholder to keep grid aligned or remove this grid wrapping if preferred, sticking to grid for now for consistency */}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Price / Day (₹)</label>
                       <input
                         type="number"
@@ -143,6 +164,21 @@ const AdminAddCar = () => {
                       />
                     </div>
                   </div>
+
+                  {formData.listingType === "Sell" && (
+                    <div className="animate-fade-in mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Reservation Fee (₹)</label>
+                      <input
+                        type="number"
+                        name="reservationFee"
+                        placeholder="e.g. 5000"
+                        value={formData.reservationFee}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all outline-none"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 

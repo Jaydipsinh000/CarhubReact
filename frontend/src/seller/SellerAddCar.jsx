@@ -16,6 +16,7 @@ const SellerAddCar = () => {
         seats: "",
         transmission: "Manual",
         listingType: "Rent",
+        reservationFee: "",
         images: [],
     });
 
@@ -57,6 +58,9 @@ const SellerAddCar = () => {
             fd.append("seats", Number(formData.seats));
             fd.append("transmission", formData.transmission);
             fd.append("listingType", formData.listingType);
+            if (formData.listingType === "Sell" && formData.reservationFee) {
+                fd.append("reservationFee", Number(formData.reservationFee));
+            }
             formData.images.forEach((img) => fd.append("images", img));
 
             await addCar(fd);
@@ -155,9 +159,27 @@ const SellerAddCar = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* SPECS CARD */}
+                            {/* Conditional: Reservation Fee for SELL */}
+                            {formData.listingType === "Sell" && (
+                                <div className="mt-6 p-5 bg-green-50 rounded-2xl border border-green-100">
+                                    <label className="text-xs font-bold text-green-700 uppercase tracking-wider ml-1">Reservation Fee (₹)</label>
+                                    <p className="text-xs text-green-600/70 mb-2">Token amount buyer pays to reserve this car</p>
+                                    <div className="relative">
+                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-green-500 font-bold">₹</span>
+                                        <input
+                                            type="number"
+                                            name="reservationFee"
+                                            placeholder="e.g. 5000"
+                                            value={formData.reservationFee}
+                                            onChange={handleChange}
+                                            className="w-full pl-10 pr-5 py-3.5 bg-white border border-green-200 rounded-2xl focus:ring-2 focus:ring-green-100 transition-all outline-none font-bold text-gray-900 placeholder:text-gray-300 placeholder:font-medium"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>                        {/* SPECS CARD */}
                         <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
                             <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
                                 <span className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">02</span>

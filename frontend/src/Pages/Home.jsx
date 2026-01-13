@@ -197,7 +197,10 @@ const Home = () => {
                   <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform">
                     <h3 className="text-2xl font-bold">{car.name}</h3>
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-blue-400 font-bold text-lg">₹{car.pricePerDay} <span className="text-white/60 text-sm font-normal">/ day</span></p>
+                      <p className="text-blue-400 font-bold text-lg">
+                        ₹{car.pricePerDay.toLocaleString()}
+                        {car.listingType !== "Sell" && <span className="text-white/60 text-sm font-normal"> / day</span>}
+                      </p>
                       <span className="bg-white/20 backdrop-blur-md p-2 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-300">
                         <ArrowRight size={16} />
                       </span>

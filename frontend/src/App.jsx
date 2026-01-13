@@ -28,6 +28,7 @@ import AdminAddCar from "./admin/AdminAddCar.jsx";
 import ProtectedRoute from "./Route/ProtectedRoute.jsx";
 import AdminUpdateCar from "./admin/AdminUpdate.jsx";
 import BookCar from "./Pages/BookCar.jsx";
+import BuyCar from "./Pages/BuyCar.jsx";
 import AdminBulkAddCars from "./admin/AdminBulkAddCars.jsx";
 import MyBookings from "./Pages/MyBookings.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
@@ -82,6 +83,7 @@ const App = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/book/:id" element={<BookCar />} />
+        <Route path="/buy/:id" element={<BuyCar />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/terms" element={<Terms />} />
 
