@@ -4,6 +4,7 @@ import { fetchCars } from "../Services/carApi";
 import { getCarImage } from "../utils/imageUtils";
 import { Search, Filter, Fuel, Settings, Zap, ArrowRight, X, SlidersHorizontal, MapPin, CheckCircle2 } from "lucide-react";
 import AuthModal from "../Components/AuthModal";
+import CarLoader from "../Components/CarLoader";
 
 const Cars = () => {
   const [cars, setCars] = useState([]);
@@ -69,10 +70,7 @@ const Cars = () => {
   if (loading)
     return (
       <div className="min-h-screen flex justify-center items-center bg-[#F8FAFC]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full shadow-lg"></div>
-          <p className="text-gray-500 font-medium animate-pulse">Loading Fleet...</p>
-        </div>
+        <CarLoader />
       </div>
     );
 

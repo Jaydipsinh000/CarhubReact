@@ -7,6 +7,7 @@ import api from "../Services/api.js";
 import { Mail, Lock, User, Phone, ArrowRight } from "lucide-react";
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
+import registerBg from "../assets/register-bg.png";
 
 const Register = () => {
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
@@ -64,15 +65,18 @@ const Register = () => {
         {/* LEFT BRANDING AREA */}
         <div className="hidden md:flex flex-col justify-center items-center w-5/12 bg-black text-white p-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-blue-900/20 blur-3xl z-0"></div>
+          {/* Background Image Overlay */}
+          <div className="absolute inset-0 z-0 opacity-40">
+            <img src={registerBg} alt="Background" className="w-full h-full object-cover" />
+          </div>
           <div className="relative z-10 text-center">
-            <h1 className="text-5xl font-bold font-display tracking-tight mb-6">Join <span className="text-blue-500">Us</span></h1>
-            <p className="text-gray-400 text-lg mb-8 leading-relaxed">
+            <h1 className="text-5xl font-bold font-display tracking-tight mb-6 drop-shadow-lg">Join <span className="text-blue-500">Us</span></h1>
+            <p className="text-gray-200 text-lg mb-8 leading-relaxed drop-shadow-md">
               Start your journey with us. Premium cars, seamless booking, unforgettable memories.
             </p>
-            <img src="https://cdni.iconscout.com/illustration/premium/thumb/car-rental-service-app-5047867-4209581.png" alt="Register Art" className="w-full max-w-[280px] object-contain drop-shadow-2xl" />
           </div>
           {/* Abstract circles */}
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 border border-white/10 rounded-full"></div>
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 border border-white/10 rounded-full z-10"></div>
         </div>
 
         {/* RIGHT FORM AREA */}

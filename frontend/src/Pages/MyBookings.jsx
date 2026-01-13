@@ -4,6 +4,7 @@ import { Calendar, MapPin, CreditCard, Clock, ArrowRight, Car } from "lucide-rea
 import { Link } from "react-router-dom";
 
 import { getCarImage } from "../utils/imageUtils";
+import CarLoader from "../Components/CarLoader";
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -31,10 +32,7 @@ const MyBookings = () => {
   if (loading)
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-          <p className="text-gray-500 font-medium animate-pulse">Loading your adventures...</p>
-        </div>
+        <CarLoader />
       </div>
     );
 

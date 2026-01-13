@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Shield, Star, Zap, MapPin, Calendar, Search, CheckCircle2 } from "lucide-react";
 import { fetchCars } from "../Services/carApi";
 import { getCarImage } from "../utils/imageUtils";
+import CarLoader from "../Components/CarLoader";
 
 const Home = () => {
   const [featuredCars, setFeaturedCars] = useState([]);
@@ -175,10 +176,8 @@ const Home = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="aspect-[4/3] bg-white/5 rounded-2xl animate-pulse"></div>
-              ))}
+            <div className="flex justify-center py-12">
+              <CarLoader />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

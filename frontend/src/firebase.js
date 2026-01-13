@@ -1,24 +1,22 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// TODO: REPLACE WITH YOUR OWN FIREBASE CONFIGURATION
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project
-// 3. Go to Project Settings -> General -> "Your apps" -> Web icon (</>)
-// 4. Register app and copy the "firebaseConfig" object below
-
+// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCjNQ9A_WsbTteWh9tFjqb7qigthyzUk34",
+    authDomain: "carent-beee7.firebaseapp.com",
+    projectId: "carent-beee7",
+    storageBucket: "carent-beee7.firebasestorage.app",
+    messagingSenderId: "135999857354",
+    appId: "1:135999857354:web:2316ac2c4273a8fdf3ca33",
+    measurementId: "G-RBM998ZJPC"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// Initialize Auth
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+export { app, analytics, auth, googleProvider };
