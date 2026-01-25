@@ -23,6 +23,11 @@ const SellerBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedBooking, setSelectedBooking] = useState(null); // Modal State
+
+    const toggleModal = (booking) => {
+        setSelectedBooking(booking);
+    };
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -197,7 +202,14 @@ const SellerBookings = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-5 text-right">
-                                                <div className="flex justify-end gap-2">
+                                                <div className="flex justify-end gap-2 items-center">
+                                                    <button
+                                                        onClick={() => toggleModal(booking)}
+                                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                        title="View Details"
+                                                    >
+                                                        <Search size={18} />
+                                                    </button>
                                                     {(!booking.status || booking.status === "confirmed") && (
                                                         <button
                                                             onClick={() => handleStatusUpdate(booking._id, "active")}
@@ -224,6 +236,126 @@ const SellerBookings = () => {
                     </div>
                 </div>
             </div>
+            {/* MODAL */}
+            {selectedBooking && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 text-left">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedBooking(null)}></div>
+                    <div className="relative bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+
+                        {/* Modal Header */}
+                        <div className="sticky top-0 bg-white/95 backdrop-blur-md px-8 py-6 border-b border-gray-100 flex items-center justify-between z-10">
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900 font-display">Booking Details</h2>
+                                <p className="text-sm text-gray-500 font-medium">#{selectedBooking._id.slice(-8).toUpperCase()}</p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedBooking(null)}
+                                className="p-2 bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-100 transition"
+                            >
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-8 space-y-8">
+                            {/* Section 1: Vehicle & Status */}
+                            <div className="flex flex-col sm:flex-row gap-6 items-start">
+                                <div className="w-full sm:w-32 h-24 bg-gray-100 rounded-xl overflow-hidden shrink-0 border border-gray-200">
+                                    <img
+                                        src={getCarImage(selectedBooking.carId)}
+                                        alt="Car"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-xl font-bold text-gray-900">{selectedBooking.carId?.name || "Deleted Car"}</h3>
+                                    <p className="text-gray-500 font-medium mb-3">{selectedBooking.carId?.brand || "Unknown Brand"}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getStatusColor(selectedBooking.paymentStatus)}`}>
+                                            Payment: {selectedBooking.paymentStatus}
+                                        </span>
+                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider">
+                                            Status: {selectedBooking.status || "Confirmed"}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 2: Customer Details */}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
+                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                        <User size={14} /> Customer Info
+                                    </h4>
+                                    <div>
+                                        <p className="font-bold text-gray-900 text-lg">{selectedBooking.fullName}</p>
+                                        <p className="text-sm text-gray-600 flex items-center gap-2 mt-1"><Phone size={14} /> {selectedBooking.phone}</p>
+                                        <p className="text-sm text-gray-600 flex items-center gap-2 mt-1"><span className="text-xs font-bold bg-blue-100 text-blue-600 px-1 rounded">@</span> {selectedBooking.email}</p>
+                                    </div>
+                                    <div className="pt-3 border-t border-gray-200">
+                                        <p className="text-xs font-bold text-gray-400 uppercase mb-1">Address</p>
+                                        <p className="text-sm text-gray-700 leading-relaxed font-medium">{selectedBooking.address || "No address provided"}</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
+                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                        <CheckCircle size={14} /> Verification & Emergency
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-xs font-bold text-gray-400 uppercase">License No.</p>
+                                            <p className="font-bold text-gray-900 text-sm mt-0.5">{selectedBooking.licenseNumber || "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-gray-400 uppercase">Expiry</p>
+                                            <p className="font-bold text-gray-900 text-sm mt-0.5">{selectedBooking.licenseExpiry || "N/A"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="pt-3 border-t border-gray-200">
+                                        <p className="text-xs font-bold text-gray-400 uppercase mb-1">Emergency Contact</p>
+                                        <p className="text-sm font-bold text-gray-900">{selectedBooking.emergencyName || "N/A"}</p>
+                                        <p className="text-xs text-gray-600 font-medium">{selectedBooking.emergencyPhone}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section 3: Timeline & Payment */}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-4">
+                                    <h4 className="text-xs font-black text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                                        <Calendar size={14} /> Schedule
+                                    </h4>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-xs font-bold text-gray-400 uppercase">Pickup</p>
+                                            <p className="font-bold text-gray-900 text-lg">{formatDate(selectedBooking.startDate)}</p>
+                                        </div>
+                                        <div className="h-px flex-1 bg-blue-200 mx-4"></div>
+                                        <div className="text-right">
+                                            <p className="text-xs font-bold text-gray-400 uppercase">Dropoff</p>
+                                            <p className="font-bold text-gray-900 text-lg">{formatDate(selectedBooking.endDate)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-4">
+                                    <h4 className="text-xs font-black text-emerald-500 uppercase tracking-wider flex items-center gap-2">
+                                        Payment Summary
+                                    </h4>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-500">Total Amount</span>
+                                        <span className="text-lg font-black text-gray-900">₹{selectedBooking.amount?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center pt-2 border-t border-emerald-100">
+                                        <span className="text-sm font-bold text-gray-500">Paid So Far</span>
+                                        <span className="text-lg font-black text-emerald-600">₹{(selectedBooking.paidAmount || 0).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </SellerLayout>
     );
 };
