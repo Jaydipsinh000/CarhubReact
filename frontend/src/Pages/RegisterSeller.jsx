@@ -4,21 +4,68 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../Services/api.js";
 import { Mail, Lock, User, Phone, ArrowRight, Briefcase } from "lucide-react";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 const RegisterSeller = () => {
     const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
+    const [file, setFile] = useState(null); // File state
     const navigate = useNavigate();
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleFileChange = (e) => setFile(e.target.files[0]);
+
+    // Handle Google Sign-in for Sellers
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            const decoded = jwtDecode(credentialResponse.credential);
+
+            // Call Google Login endpoint with ROLE="seller"
+            const res = await api.post("/user/google", {
+                name: decoded.name,
+                email: decoded.email,
+                googleId: decoded.sub,
+                photo: decoded.picture,
+                role: "seller" // IMPORTANT: Request seller role
+            });
+
+            const userData = res.data.user;
+            localStorage.setItem("token", res.data.token);
+            localStorage.setItem("user", JSON.stringify(userData));
+
+            toast.success("Account Created via Google!");
+            navigate("/seller/dashboard"); // They will see "Pending" screen if needed
+        } catch (err) {
+            console.error(err);
+            toast.error("Google Sign-in Failed");
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Pass role as "seller"
-            const res = await api.post("/user/register", { ...form, role: "seller" });
-            toast.success("Seller Account Created! Please verify OTP.");
-            navigate("/verify-otp", { state: { email: form.email } });
+            if (!file) {
+                toast.error("Please upload ID/Business Proof");
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append("name", form.name);
+            fd.append("email", form.email);
+            fd.append("password", form.password);
+            fd.append("phone", form.phone);
+            fd.append("role", "seller");
+            fd.append("document", file); // Must match backend field name
+
+            // Make sure headers are set correctly by axios (multipart/form-data)
+            const res = await api.post("/user/register", fd, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+
+            toast.success(res.data.message || "Application Submitted! Please Login.");
+            navigate("/login");
         } catch (err) {
+            console.error(err);
             toast.error(err.response?.data?.message || "Registration failed");
         }
     };
@@ -57,6 +104,26 @@ const RegisterSeller = () => {
                         </div>
 
                         {/* REGISTER FORM */}
+                        <div className="mb-6 flex justify-center">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => toast.error("Google Sign-in Failed")}
+                                useOneTap
+                                theme="filled_blue"
+                                size="large"
+                                text="signup_with"
+                                shape="pill"
+                                width="300"
+                            />
+                        </div>
+
+                        <div className="relative flex items-center justify-center mb-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200"></div>
+                            </div>
+                            <span className="relative bg-white px-4 text-sm text-gray-500 font-medium uppercase tracking-wide">Or via form</span>
+                        </div>
+
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Name */}
@@ -115,11 +182,33 @@ const RegisterSeller = () => {
                                 />
                             </div>
 
+                            {/* Document Upload */}
+                            <div className="relative group">
+                                <label className="flex items-center gap-4 px-4 py-3 bg-gray-50 border border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-100 transition-all">
+                                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                                        <Briefcase size={20} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-gray-800 text-sm truncate">
+                                            {file ? file.name : "Upload Business Proof or ID"}
+                                        </p>
+                                        <p className="text-xs text-gray-400">Required for manual verification</p>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        onChange={handleFileChange}
+                                        accept="image/*,.pdf"
+                                        className="hidden"
+                                        required
+                                    />
+                                </label>
+                            </div>
+
                             <button
                                 type="submit"
                                 className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 mt-4"
                             >
-                                Register as Seller <ArrowRight size={18} />
+                                Submit Application <ArrowRight size={18} />
                             </button>
                         </form>
 

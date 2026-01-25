@@ -7,6 +7,30 @@ import { toast } from "react-toastify";
 
 const SellerAddCar = () => {
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    if (user.role === "seller" && user.sellerVerificationStatus === "pending") {
+        return (
+            <SellerLayout>
+                <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
+                    <div className="w-24 h-24 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center mb-6">
+                        <HelpCircle size={48} />
+                    </div>
+                    <h2 className="text-2xl font-black text-gray-900 font-display">Account Pending Approval</h2>
+                    <p className="text-gray-500 mt-2 max-w-md mx-auto">
+                        Your seller account is currently under review by the administrator.
+                        You will be able to add vehicles once your account is approved.
+                    </p>
+                    <button
+                        onClick={() => navigate("/seller/dashboard")}
+                        className="mt-8 px-8 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-colors"
+                    >
+                        Go to Dashboard
+                    </button>
+                </div>
+            </SellerLayout>
+        );
+    }
 
     const [formData, setFormData] = useState({
         name: "",

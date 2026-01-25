@@ -58,6 +58,15 @@ const UserSchema = new mongoose.Schema(
     photo: {
       type: String,
     },
+    // For Seller Document Verification
+    documentImage: {
+      type: String, // Path to uploaded ID/Business Proof
+    },
+    documentStatus: {
+      type: String,
+      enum: ["not_uploaded", "uploaded", "approved", "rejected"],
+      default: "not_uploaded",
+    },
   },
   { timestamps: true }
 );

@@ -41,19 +41,47 @@ export const registerUser = async (req, res, next) => {
 
     // New User
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({
+
+    // Check if file uploaded (for Seller Verification)
+    const documentImage = req.file ? req.file.path : null;
+
+    // Determine Status
+    let sellerStatus = "approved"; // Default for users (irrelevent)
+    if (role === "seller") {
+      // If doc is uploaded, we go to pending. If no doc (should be required on frontend), still pending.
+      sellerStatus = "pending";
+    }
+
+    const newUser = await User.create({
       name,
       email,
       phone,
       password: hashedPassword,
       otp,
-      otpExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
-      isVerified: false,
+      otpExpires: Date.now() + 10 * 60 * 1000,
+      isVerified: role === "seller" ? true : false, // Sellers auto-verify email (bypass broken mail)
       role: role === "seller" ? "seller" : "user",
-      sellerVerificationStatus: role === "seller" ? "pending" : "approved",
+      sellerVerificationStatus: sellerStatus,
+      documentImage: documentImage, // Save path
+      documentStatus: documentImage ? "uploaded" : "not_uploaded"
     });
 
-    // Set OTP data for middleware
+    // IF SELLER -> BYPASS EMAIL OTP
+    if (role === "seller") {
+      return res.status(201).json({
+        success: true,
+        message: "Application Submitted! Admin will verify your documents.",
+        user: {
+          id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          sellerVerificationStatus: newUser.sellerVerificationStatus,
+        },
+      });
+    }
+
+    // Set OTP data for middleware (FOR USERS)
     req.otpData = { email, otp, type: "register" };
 
     // Call next middleware (sendOtpMail)
@@ -167,7 +195,7 @@ export const loginUser = async (req, res) => {
 // =======================
 export const googleLogin = async (req, res) => {
   try {
-    const { name, email, googleId, photo } = req.body;
+    const { name, email, googleId, photo, role } = req.body; // Accept role (optional)
 
     // 1. Check if user exists
     let user = await User.findOne({ email });
@@ -176,15 +204,18 @@ export const googleLogin = async (req, res) => {
       // If user exists, ensure googleId is set (link account)
       if (!user.googleId) {
         user.googleId = googleId;
-        // Optionally update verified status if trusting google
         user.isVerified = true;
         await user.save();
       }
     } else {
       // 2. If user doesn't exist, create new user
-      // Generate random password as fallback
       const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      // Determine Role & Status
+      // If role passed is 'seller', create as pending seller. Default is 'user'.
+      const assignedRole = role === "seller" ? "seller" : "user";
+      const sellerStatus = role === "seller" ? "pending" : "approved";
 
       user = await User.create({
         name,
@@ -192,7 +223,9 @@ export const googleLogin = async (req, res) => {
         password: hashedPassword,
         googleId,
         isVerified: true, // Google emails are verified
-        role: "user" // Default role
+        role: assignedRole,
+        sellerVerificationStatus: sellerStatus,
+        documentStatus: role === "seller" ? "not_uploaded" : undefined
       });
     }
 
@@ -200,6 +233,7 @@ export const googleLogin = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     // 4. Return Response
+    // If seller is pending, they might be restricted, but they can login.
     res.status(200).json({
       success: true,
       token,
@@ -208,6 +242,7 @@ export const googleLogin = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        sellerVerificationStatus: user.sellerVerificationStatus,
         photo: photo
       }
     });

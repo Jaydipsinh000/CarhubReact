@@ -3,10 +3,13 @@ import { loginUser, registerUser, verifyOtp, googleLogin, forgotPassword, resetP
 import sendOtpMail from "../Middleware/sendOtpMail.js"; // import middleware
 import authUser from "../Middleware/authUser.js";
 
+import upload from "../Middleware/uploadMiddleware.js";
+
 const router = express.Router();
 
 // Register a new user and send OTP
-router.post("/register", registerUser, sendOtpMail); // add sendOtpMail as middleware
+// Note: Changed to support file upload (multipart/form-data)
+router.post("/register", upload.single("document"), registerUser, sendOtpMail);
 
 // Verify OTP
 router.post("/verify-otp", verifyOtp);
