@@ -37,6 +37,12 @@ const UserSchema = new mongoose.Schema(
       default: false,
     },
 
+    sellerVerificationStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved", // Default to approved for legacy users, but we will force "pending" for NEW sellers in registerUser
+    },
+
     otp: {
       type: String,
     },

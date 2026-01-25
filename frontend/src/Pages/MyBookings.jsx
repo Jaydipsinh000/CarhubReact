@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getMyBookings } from "../Services/paymentApi.js";
-import { Calendar, MapPin, CreditCard, Clock, ArrowRight, Car } from "lucide-react";
+import { getMyBookings, createOrder, verifyPayment } from "../Services/paymentApi.js";
+import { Calendar, MapPin, CreditCard, Clock, ArrowRight, Car, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { getCarImage } from "../utils/imageUtils";
 import CarLoader from "../Components/CarLoader";
@@ -10,6 +11,7 @@ const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [processingId, setProcessingId] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -29,6 +31,83 @@ const MyBookings = () => {
     fetchBookings();
   }, []);
 
+  /* ================= HANDLE PAYMENT ================= */
+  const handlePayNow = async (booking) => {
+    const amountToPay = booking.amount - (booking.paidAmount || 0);
+    if (amountToPay <= 0) return;
+
+    if (!window.Razorpay) {
+      toast.error("Payment gateway failed to load.");
+      return;
+    }
+
+    setProcessingId(booking._id);
+
+    try {
+      // 1. Create Order for Remaining Amount
+      const orderRes = await createOrder({
+        amount: amountToPay,
+        bookingId: booking._id
+      });
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderRes.data.amount,
+        currency: "INR",
+        name: "Carent Pay",
+        description: `Ref: ${booking._id.slice(-6).toUpperCase()}`,
+        order_id: orderRes.data.id,
+        handler: async function (response) {
+          try {
+            await verifyPayment({
+              bookingId: booking._id,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+            });
+
+            toast.success("Payment Successful!");
+
+            // Update local state with new paid amount
+            setBookings(prev => prev.map(b =>
+              b._id === booking._id
+                ? {
+                  ...b,
+                  paidAmount: (b.paidAmount || 0) + amountToPay,
+                  paymentStatus: 'paid' // Assuming full payment cleans it up, backend handles partial logic too if needed but here we pay remaning full
+                }
+                : b
+            ));
+          } catch (err) {
+            toast.error("Payment verification failed.");
+          } finally {
+            setProcessingId(null);
+          }
+        },
+        prefill: {
+          name: booking.fullName,
+          email: booking.email,
+          contact: booking.phone
+        },
+        theme: { color: "#000000" },
+        modal: {
+          ondismiss: () => {
+            setProcessingId(null);
+            toast.info("Payment Cancelled");
+          }
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
+
+    } catch (err) {
+      console.error("Payment Init Error:", err);
+      toast.error(err.response?.data?.message || "Could not initiate payment.");
+      setProcessingId(null);
+    }
+  };
+
   if (loading)
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -45,7 +124,7 @@ const MyBookings = () => {
             My Bookings
           </h1>
           <p className="text-gray-500 mt-1 sm:mt-2 text-base sm:text-lg">
-            Manage your upcoming trips and viewing history
+            Manage your upcoming trips and payments
           </p>
         </div>
 
@@ -97,25 +176,23 @@ const MyBookings = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
 
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-xl font-bold font-display tracking-wide truncate">
-                      {booking.carId?.name}
-                    </h3>
-                    <p className="text-sm opacity-90 flex items-center gap-1">
-                      <Car size={14} /> {booking.carId?.brand}
-                    </p>
-                  </div>
-
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-4 right-4 flex gap-2">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm backdrop-blur-md
-                          ${booking.paymentStatus === "paid"
-                          ? "bg-emerald-500/90 text-white"
-                          : "bg-yellow-500/90 text-white"
-                        }`}
+                      className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md text-white
+                          ${booking.paymentStatus === "paid" ? "bg-emerald-500/90" : "bg-yellow-500/90"}`}
                     >
                       {booking.paymentStatus}
                     </span>
+                    {booking.status === "active" && (
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md bg-blue-500/90 text-white">
+                        Picked Up
+                      </span>
+                    )}
+                    {booking.status === "completed" && (
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md bg-gray-600/90 text-white">
+                        Completed
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -140,42 +217,46 @@ const MyBookings = () => {
                         </div>
                       </div>
                     </div>
-
-                    {/* DETAILS */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-gray-400" />
-                          <span>Duration</span>
-                        </div>
-                        <span className="font-medium text-gray-900">
-                          {Math.ceil((new Date(booking.endDate) - new Date(booking.startDate)) / (1000 * 60 * 60 * 24)) + 1} Days
-                        </span>
-                      </div>
-                      {booking.carId?.transmission && (
-                        <div className="flex items-center justify-between text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <Car size={16} className="text-gray-400" />
-                            <span>Type</span>
-                          </div>
-                          <span className="font-medium text-gray-900">{booking.carId?.transmission}</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   {/* FOOTER */}
                   <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-xs text-gray-400 font-medium uppercase">Total Paid</span>
-                      <span className="text-xl font-bold text-gray-900 font-display">
-                        ₹{booking.amount?.toLocaleString() || 0}
-                      </span>
+                      <span className="text-xs text-gray-400 font-medium uppercase">Payment Status</span>
+                      <div className="flex items-baseline gap-1">
+                        {booking.paymentStatus === 'paid' ? (
+                          <span className="text-xl font-bold text-emerald-600 font-display">Fully Paid</span>
+                        ) : (
+                          <>
+                            <span className="text-xl font-bold text-gray-900 font-display">
+                              ₹{(booking.paidAmount || 0).toLocaleString()}
+                            </span>
+                            <span className="text-xs text-gray-400 font-medium">
+                              / ₹{booking.amount?.toLocaleString()}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
 
-                    <button className="p-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-full transition-colors border border-gray-200">
-                      <ArrowRight size={20} />
-                    </button>
+                    {booking.paymentStatus !== 'paid' && (
+                      <button
+                        onClick={() => handlePayNow(booking)}
+                        disabled={processingId === booking._id}
+                        className="px-5 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition shadow-lg shadow-black/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-95 transform duration-100"
+                      >
+                        {processingId === booking._id ? (
+                          <>Processing...</>
+                        ) : (
+                          <>Pay Remaining ₹{(booking.amount - (booking.paidAmount || 0)).toLocaleString()}</>
+                        )}
+                      </button>
+                    )}
+                    {booking.paymentStatus === 'paid' && (
+                      <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100">
+                        <Check size={18} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

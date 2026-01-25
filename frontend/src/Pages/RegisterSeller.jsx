@@ -15,7 +15,7 @@ const RegisterSeller = () => {
         e.preventDefault();
         try {
             // Pass role as "seller"
-            await api.post("/user/register", { ...form, role: "seller" });
+            const res = await api.post("/user/register", { ...form, role: "seller" });
             toast.success("Seller Account Created! Please verify OTP.");
             navigate("/verify-otp", { state: { email: form.email } });
         } catch (err) {

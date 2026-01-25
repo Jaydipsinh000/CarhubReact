@@ -39,12 +39,30 @@ export const verifyPayment = async (req, res) => {
     if (expected !== signature)
       return res.status(400).json({ message: "Invalid signature" });
 
-    await Booking.findByIdAndUpdate(bookingId, {
-      paymentStatus: "paid",
-    });
+    // 1. Fetch the order from Razorpay to know the actual paid amount
+    const order = await razorpay.orders.fetch(orderId);
+    if (!order) return res.status(400).json({ message: "Order not found" });
 
-    res.json({ success: true });
+    const paidNow = order.amount / 100; // Razorpay returns amount in paisa
+
+    // 2. Update Booking
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    booking.paidAmount = (booking.paidAmount || 0) + paidNow;
+
+    // Check if fully paid (allow small margin for float errors)
+    if (booking.paidAmount >= booking.amount - 1) {
+      booking.paymentStatus = "paid";
+    } else {
+      booking.paymentStatus = "partial";
+    }
+
+    await booking.save();
+
+    res.json({ success: true, paymentStatus: booking.paymentStatus });
   } catch (err) {
+    console.error("VERIFY ERROR:", err);
     res.status(500).json({ message: "Payment verification failed" });
   }
 };

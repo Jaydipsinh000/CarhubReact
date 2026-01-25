@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import SellerLayout from "./SellerLayout.jsx";
 import api from "../Services/api.js";
+import { updateBookingStatus } from "../Services/sellerApi.js";
+import { toast } from "react-toastify";
 import {
     Calendar,
     User,
@@ -15,7 +17,7 @@ import {
     XCircle,
     Download
 } from "lucide-react";
-import { getCarImage } from "../utils/imageUtils";
+import { getCarImage } from "../utils/imageUtils.js";
 
 const SellerBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -36,6 +38,18 @@ const SellerBookings = () => {
         fetchBookings();
     }, []);
 
+    const handleStatusUpdate = async (id, newStatus) => {
+        try {
+            await updateBookingStatus(id, newStatus);
+            toast.success(`Booking marked as ${newStatus}`);
+            // Refresh local state
+            setBookings(prev => prev.map(b => b._id === id ? { ...b, status: newStatus } : b));
+        } catch (error) {
+            console.error("Update Status Error:", error);
+            toast.error("Failed to update status");
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return "N/A";
         return new Date(dateString).toLocaleDateString("en-IN", {
@@ -49,6 +63,7 @@ const SellerBookings = () => {
         switch (status?.toLowerCase()) {
             case 'paid': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
             case 'pending': return 'bg-amber-50 text-amber-600 border-amber-100';
+            case 'partial': return 'bg-blue-50 text-blue-600 border-blue-100';
             case 'cancelled': return 'bg-red-50 text-red-600 border-red-100';
             default: return 'bg-gray-50 text-gray-500 border-gray-100';
         }
@@ -83,11 +98,6 @@ const SellerBookings = () => {
                             Track and manage your vehicle reservations
                         </p>
                     </div>
-                    <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition shadow-sm">
-                            <Download size={18} /> Export CSV
-                        </button>
-                    </div>
                 </div>
 
                 {/* FILTERS */}
@@ -102,14 +112,6 @@ const SellerBookings = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-12 pr-6 py-4 bg-gray-50/50 border-none rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all outline-none font-medium placeholder:text-gray-400"
                             />
-                        </div>
-                        <div className="relative">
-                            <Filter size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                            <select className="pl-12 pr-10 py-4 bg-gray-50/50 hover:bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-100 outline-none font-bold text-gray-700 cursor-pointer appearance-none min-w-[160px]">
-                                <option value="all">All Status</option>
-                                <option value="paid">Paid</option>
-                                <option value="pending">Pending</option>
-                            </select>
                         </div>
                     </div>
 
@@ -180,16 +182,39 @@ const SellerBookings = () => {
                                             </td>
                                             <td className="px-6 py-5">
                                                 <span className="font-black text-gray-900">₹{booking.amount?.toLocaleString()}</span>
+                                                <div className="text-[10px] text-gray-400 font-medium">
+                                                    Paid: ₹{(booking.paidAmount || 0).toLocaleString()}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-5">
-                                                <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusColor(booking.paymentStatus)}`}>
-                                                    {booking.paymentStatus}
-                                                </span>
+                                                <div className="flex flex-col gap-1 items-start">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusColor(booking.paymentStatus)}`}>
+                                                        {booking.paymentStatus}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
+                                                        {booking.status || "CONFIRMED"}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-5 text-right">
-                                                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white rounded-xl transition-all border border-transparent hover:border-gray-100 hover:shadow-sm">
-                                                    <MoreHorizontal size={20} />
-                                                </button>
+                                                <div className="flex justify-end gap-2">
+                                                    {(!booking.status || booking.status === "confirmed") && (
+                                                        <button
+                                                            onClick={() => handleStatusUpdate(booking._id, "active")}
+                                                            className="px-3 py-1.5 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-blue-700 transition"
+                                                        >
+                                                            Pickup
+                                                        </button>
+                                                    )}
+                                                    {booking.status === "active" && (
+                                                        <button
+                                                            onClick={() => handleStatusUpdate(booking._id, "completed")}
+                                                            className="px-3 py-1.5 bg-green-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-green-700 transition"
+                                                        >
+                                                            Return
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

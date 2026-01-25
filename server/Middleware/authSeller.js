@@ -20,5 +20,13 @@ export const sellerOnly = (req, res, next) => {
         });
     }
 
+    // Check verification status if it's a seller (Admins bypass this)
+    if (req.user.role === "seller" && req.user.sellerVerificationStatus !== "approved") {
+        return res.status(403).json({
+            success: false,
+            message: "Account Pending Admin Verification. Please wait for approval.",
+        });
+    }
+
     next();
 };

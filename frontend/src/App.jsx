@@ -34,6 +34,7 @@ import MyBookings from "./Pages/MyBookings.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
 import AdminBookings from "./admin/AdminBookings.jsx";
 import AdminPayments from "./admin/AdminPayments.jsx";
+import AdminVerifySellers from "./admin/AdminVerifySellers.jsx";
 
 // Seller
 import SellerRoute from "./Route/SellerRoute.jsx";
@@ -42,6 +43,7 @@ import SellerCars from "./seller/SellerCars.jsx";
 import SellerAddCar from "./seller/SellerAddCar.jsx";
 import SellerUpdateCar from "./seller/SellerUpdateCar.jsx";
 import SellerBookings from "./seller/SellerBookings.jsx";
+import SellerReports from "./seller/SellerReports.jsx";
 
 import ScrollToTop from "./Components/ScrollToTop.jsx";
 
@@ -183,12 +185,24 @@ const App = () => {
           }
         />
 
+        <Route
+          path="/admin/verify-sellers"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <AdminVerifySellers />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        />
+
         {/* ===== SELLER ROUTES ===== */}
         <Route path="/seller/dashboard" element={<SellerRoute><SellerDashboard /></SellerRoute>} />
         <Route path="/seller/cars" element={<SellerRoute><SellerCars /></SellerRoute>} />
         <Route path="/seller/bookings" element={<SellerRoute><SellerBookings /></SellerRoute>} />
         <Route path="/seller/add-car" element={<SellerRoute><SellerAddCar /></SellerRoute>} />
         <Route path="/seller/cars/update/:id" element={<SellerRoute><SellerUpdateCar /></SellerRoute>} />
+        <Route path="/seller/reports" element={<SellerRoute><SellerReports /></SellerRoute>} />
       </Routes>
 
       {/* ❌ No Footer for Admin/Standalone */}

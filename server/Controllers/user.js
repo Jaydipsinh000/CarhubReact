@@ -50,6 +50,7 @@ export const registerUser = async (req, res, next) => {
       otpExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
       isVerified: false,
       role: role === "seller" ? "seller" : "user",
+      sellerVerificationStatus: role === "seller" ? "pending" : "approved",
     });
 
     // Set OTP data for middleware
@@ -148,7 +149,13 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        sellerVerificationStatus: user.sellerVerificationStatus,
+      },
     });
   } catch (error) {
     console.error("Login Error:", error);

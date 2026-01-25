@@ -66,3 +66,92 @@ export const getSellerStats = async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to fetch seller stats" });
     }
 };
+
+// ==========================
+// GET SELLER REPORTS
+// ==========================
+export const getSellerReports = async (req, res) => {
+    try {
+        const sellerId = req.user._id;
+        const { range } = req.query; // '1m', '6m', '1y'
+        let months = 6;
+        if (range === '1m') months = 1;
+        if (range === '1y') months = 12;
+
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - months);
+
+        // 1. Get Seller's Cars
+        const sellerCars = await Car.find({ createdBy: sellerId }).select('_id');
+        const carIds = sellerCars.map(car => car._id);
+
+        if (carIds.length === 0) {
+            return res.json({
+                success: true,
+                chartData: [],
+                kpi: { revenue: 0, bookings: 0, cars: 0 }
+            });
+        }
+
+        // 2. REVENUE AGGREGATION
+        const revenueStats = await Booking.aggregate([
+            {
+                $match: {
+                    carId: { $in: carIds },
+                    createdAt: { $gte: startDate },
+                    paymentStatus: { $in: ['paid', 'partial', 'pending'] } // Include pending for now as logic might vary, usually paid
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                    revenue: { $sum: "$amount" },
+                    bookings: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id": 1 } }
+        ]);
+
+        // 3. MERGE DATA
+        const mergedData = [];
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        for (let i = 0; i < months; i++) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - (months - 1 - i));
+            const key = d.toISOString().slice(0, 7); // YYYY-MM
+            const monthLabel = monthNames[d.getMonth()];
+
+            const revData = revenueStats.find(r => r._id === key) || { revenue: 0, bookings: 0 };
+
+            // Simulating Platform Fees (e.g. 10%)
+            const platformFees = Math.round(revData.revenue * 0.1);
+
+            mergedData.push({
+                name: monthLabel,
+                revenue: revData.revenue,
+                expenses: platformFees, // "Expenses" here = Platform Fees
+                bookings: revData.bookings,
+                netIncome: revData.revenue - platformFees
+            });
+        }
+
+        // 4. KPI TOTALS for the period
+        const totalRevenue = mergedData.reduce((acc, curr) => acc + curr.revenue, 0);
+        const totalBookings = mergedData.reduce((acc, curr) => acc + curr.bookings, 0);
+
+        res.json({
+            success: true,
+            chartData: mergedData,
+            kpi: {
+                revenue: totalRevenue,
+                bookings: totalBookings,
+                cars: carIds.length
+            }
+        });
+
+    } catch (error) {
+        console.error("Seller Reports Error:", error);
+        res.status(500).json({ success: false, message: "Failed to fetch seller reports" });
+    }
+};

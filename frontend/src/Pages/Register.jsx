@@ -18,7 +18,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/user/register", form);
+      const res = await api.post("/user/register", form);
       toast.success("Registered successfully! OTP sent to your email.");
       navigate("/verify-otp", { state: { email: form.email } });
     } catch (err) {

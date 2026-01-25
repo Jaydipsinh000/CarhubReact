@@ -26,6 +26,7 @@ const AdminSidebar = () => {
     { name: "Bulk Add Cars", path: "/admin/cars/bulk", icon: Upload },
     { name: "Bookings", path: "/admin/bookings", icon: ClipboardList },
     { name: "Payments", path: "/admin/payments", icon: CreditCard },
+    { name: "Verify Sellers", path: "/admin/verify-sellers", icon: Users },
   ];
 
   const handleLogout = () => {
@@ -68,8 +69,8 @@ const AdminSidebar = () => {
           >
             <item.icon
               className={`w-5 h-5 transition-colors ${location.pathname.startsWith(item.path)
-                  ? "text-blue-500"
-                  : "text-slate-500 group-hover:text-white"
+                ? "text-blue-500"
+                : "text-slate-500 group-hover:text-white"
                 }`}
             />
             <span className="flex-1">{item.name}</span>

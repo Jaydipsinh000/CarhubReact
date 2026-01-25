@@ -1,7 +1,7 @@
 import express from "express";
 import User from "../Models/User.js";
 import Booking from "../Models/Booking.js";
-import { getAdminStats, deleteUser, deleteBooking } from "../Controllers/adminController.js";
+import { getAdminStats, deleteUser, deleteBooking, getPendingSellers, verifySeller, getSystemReports } from "../Controllers/adminController.js";
 import { protect, adminOnly } from "../Middleware/authAdmin.js";
 
 const router = express.Router();
@@ -16,6 +16,13 @@ router.get("/stats", protect, adminOnly, getAdminStats);
 // DELETE ACTIONS
 router.delete("/users/:id", protect, adminOnly, deleteUser);
 router.delete("/bookings/:id", protect, adminOnly, deleteBooking);
+
+// SELLER VERIFICATION
+router.get("/pending-sellers", protect, adminOnly, getPendingSellers);
+router.post("/verify-seller", protect, adminOnly, verifySeller);
+
+// REPORTS
+router.get("/reports", protect, adminOnly, getSystemReports);
 
 /**
  * ======================
@@ -51,7 +58,7 @@ router.get("/bookings", protect, adminOnly, async (req, res) => {
       .populate({
         path: "carId",
         select: "name brand pricePerDay images",
-        populate: { path: "createdBy", select: "name email" } // Seller Info
+        populate: { path: "createdBy", select: "name email" } // placeholder Info
       })
       .sort({ createdAt: -1 });
 

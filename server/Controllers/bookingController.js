@@ -15,6 +15,7 @@ export const createBooking = async (req, res) => {
       licenseExpiry,
       emergencyName,
       emergencyPhone,
+      paymentStatus // Optional, defaulting to pending if not sent
     } = req.body;
 
     if (!carId || !startDate || !endDate)
@@ -38,8 +39,11 @@ export const createBooking = async (req, res) => {
       address,
       licenseNumber,
       licenseExpiry,
+      licenseExpiry,
       emergencyName,
       emergencyPhone,
+      paidAmount: paymentStatus === 'paid' ? amount : 0, // If paid upfront, set paidAmount
+      status: "confirmed"
     });
 
     console.log("Booking Created:", booking._id);
@@ -93,5 +97,58 @@ export const getSellerBookings = async (req, res) => {
   } catch (error) {
     console.error("Get Seller Bookings Error:", error);
     res.status(500).json({ success: false, message: "Failed to fetch bookings" });
+  }
+};
+
+// =======================
+// UPDATE BOOKING STATUS (Seller/Admin)
+// =======================
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+
+    if (!["active", "completed", "cancelled"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
+
+    const booking = await Booking.findById(id);
+    if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
+
+    booking.status = status;
+    await booking.save();
+
+    res.status(200).json({ success: true, message: `Booking marked as ${status}`, booking });
+  } catch (error) {
+    console.error("Update Status Error:", error);
+    res.status(500).json({ success: false, message: "Failed to update status" });
+  }
+};
+
+// =======================
+// SETTLE PAYMENT (User)
+// =======================
+export const settlePayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body; // Amount being paid now
+
+    const booking = await Booking.findById(id);
+    if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
+
+    booking.paidAmount = (booking.paidAmount || 0) + Number(amount);
+
+    if (booking.paidAmount >= booking.amount) {
+      booking.paymentStatus = "paid";
+    } else {
+      booking.paymentStatus = "partial";
+    }
+
+    await booking.save();
+
+    res.status(200).json({ success: true, message: "Payment successful", booking });
+  } catch (error) {
+    console.error("Payment Error:", error);
+    res.status(500).json({ success: false, message: "Payment failed" });
   }
 };

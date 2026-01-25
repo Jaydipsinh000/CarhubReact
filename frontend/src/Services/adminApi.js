@@ -28,5 +28,10 @@ export const deleteCar = (id) =>
 
 export const getAdminStats = () => API.get("/admin/stats");
 
+export const getPendingSellers = () => API.get("/admin/pending-sellers");
+
+export const verifySeller = (sellerId, status) =>
+  API.post("/admin/verify-seller", { sellerId, status });
+
 
 

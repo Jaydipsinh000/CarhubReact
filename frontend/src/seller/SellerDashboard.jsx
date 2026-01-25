@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import SellerLayout from "./SellerLayout.jsx";
 import { getSellerStats } from "../Services/sellerApi.js";
 import {
@@ -67,6 +68,47 @@ const SellerDashboard = () => {
         );
     }
 
+    // 🚨 VERIFICATION CHECK
+    if (user?.sellerVerificationStatus === "pending") {
+        return (
+            <SellerLayout>
+                <div className="max-w-3xl mx-auto mt-20 p-8 text-center">
+                    <div className="w-24 h-24 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <CalendarCheck size={48} />
+                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 mb-4">Verification Pending</h1>
+                    <p className="text-lg text-slate-500 max-w-lg mx-auto mb-8">
+                        Your seller account is currently under review by our admin team. You will be able to access the dashboard and list cars once approved.
+                    </p>
+                    <div className="inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        Status: Pending Review
+                    </div>
+                </div>
+            </SellerLayout>
+        );
+    }
+
+    if (user?.sellerVerificationStatus === "rejected") {
+        return (
+            <SellerLayout>
+                <div className="max-w-3xl mx-auto mt-20 p-8 text-center">
+                    <div className="w-24 h-24 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <Smartphone size={48} />
+                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 mb-4">Account Rejected</h1>
+                    <p className="text-lg text-slate-500 max-w-lg mx-auto mb-8">
+                        Your seller application was not approved. Please contact support for more information.
+                    </p>
+                    <div className="inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                        Status: Rejected
+                    </div>
+                </div>
+            </SellerLayout>
+        );
+    }
+
     return (
         <SellerLayout>
             <div className="max-w-7xl mx-auto space-y-8">
@@ -91,12 +133,10 @@ const SellerDashboard = () => {
                             </p>
                         </div>
                         <div className="flex gap-3">
-                            <button className="px-6 py-3 bg-white text-indigo-950 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2">
-                                <Smartphone size={18} /> Mobile App
-                            </button>
-                            <button className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 transition-all flex items-center gap-2">
+                            {/* Mobile button removed */}
+                            <Link to="/seller/reports" className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 transition-all flex items-center gap-2">
                                 <ArrowUpRight size={18} /> View Reports
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -278,7 +318,7 @@ const SellerDashboard = () => {
                                 <div className="hidden md:block">
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status</p>
                                     <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide ${b.status === 'Active' ? 'bg-emerald-50 text-emerald-600' :
-                                            b.status === 'Upcoming' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'
+                                        b.status === 'Upcoming' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'
                                         }`}>
                                         {b.status}
                                     </span>

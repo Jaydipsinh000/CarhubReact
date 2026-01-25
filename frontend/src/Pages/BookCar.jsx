@@ -38,6 +38,7 @@ const BookCar = () => {
 
   const [showTerms, setShowTerms] = useState(false);
   const [agree, setAgree] = useState(false);
+  const [paymentOption, setPaymentOption] = useState('full'); // full, partial, later
 
   // Form State
   const [form, setForm] = useState({
@@ -120,27 +121,45 @@ const BookCar = () => {
 
     try {
       const token = localStorage.getItem("token");
+      const bookingData = {
+        carId: car._id,
+        ...form,
+        startDate,
+        endDate,
+        amount: totalPrice,
+        paymentStatus: "pending" // Default to pending
+      };
+
+      // 1. Create Booking
       const bookingRes = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/bookings/book`,
-        {
-          carId: car._id,
-          ...form,
-          startDate,
-          endDate,
-          amount: totalPrice,
-        },
+        bookingData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const bookingId = bookingRes.data.booking._id;
-      const orderRes = await createOrder({ amount: totalPrice, bookingId });
+
+      // 2. Determine Payment Amount
+      let payableAmount = 0;
+      if (paymentOption === 'full') payableAmount = totalPrice;
+      if (paymentOption === 'partial') payableAmount = Math.round(totalPrice * 0.2);
+
+      // 3. Handle Pay Later
+      if (paymentOption === 'later') {
+        setProcessing(false);
+        navigate("/my-bookings");
+        return;
+      }
+
+      // 4. Handle Online Payment
+      const orderRes = await createOrder({ amount: payableAmount, bookingId });
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: orderRes.data.amount,
         currency: "INR",
         name: "Carent Premium",
-        description: `Rental: ${car.name}`,
+        description: `Booking: ${car.name}`,
         order_id: orderRes.data.id,
         handler: async function (response) {
           try {
@@ -152,12 +171,19 @@ const BookCar = () => {
             });
             navigate("/my-bookings");
           } catch (err) {
-            alert("Payment verification failed.");
+            alert("Payment verification failed. Booking saved in 'My Bookings'.");
+            navigate("/my-bookings");
           }
         },
         prefill: { name: form.fullName, email: form.email, contact: form.phone },
         theme: { color: "#000000" },
-        modal: { ondismiss: () => setProcessing(false) }
+        modal: {
+          ondismiss: () => {
+            setProcessing(false);
+            alert("Payment cancelled. You can retry from 'My Bookings'.");
+            navigate("/my-bookings");
+          }
+        }
       };
 
       if (!window.Razorpay) {
@@ -167,6 +193,7 @@ const BookCar = () => {
       }
       new window.Razorpay(options).open();
     } catch (err) {
+      console.error(err);
       alert(err.response?.data?.message || "Booking failed.");
       setProcessing(false);
     }
@@ -264,6 +291,46 @@ const BookCar = () => {
                 </div>
               </div>
 
+              {/* Payment Selection */}
+              <div className="space-y-4 py-6 border-t border-gray-100">
+                <label className="text-sm font-bold text-gray-500 uppercase block">Payment Option</label>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <label className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentOption === 'full' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                      <input type="radio" name="payment" checked={paymentOption === 'full'} onChange={() => setPaymentOption('full')} className="w-5 h-5 text-black focus:ring-black" />
+                      <div>
+                        <span className="block font-bold text-gray-900">Pay Full Amount</span>
+                        <span className="text-xs text-gray-500">Secure your car instantly</span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-gray-900">₹{totalPrice.toLocaleString()}</span>
+                  </label>
+
+                  <label className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentOption === 'partial' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                      <input type="radio" name="payment" checked={paymentOption === 'partial'} onChange={() => setPaymentOption('partial')} className="w-5 h-5 text-black focus:ring-black" />
+                      <div>
+                        <span className="block font-bold text-gray-900">Pay Deposit (20%)</span>
+                        <span className="text-xs text-gray-500">Pay rest at pickup</span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-gray-900">₹{Math.round(totalPrice * 0.2).toLocaleString()}</span>
+                  </label>
+
+                  <label className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentOption === 'later' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                      <input type="radio" name="payment" checked={paymentOption === 'later'} onChange={() => setPaymentOption('later')} className="w-5 h-5 text-black focus:ring-black" />
+                      <div>
+                        <span className="block font-bold text-gray-900">Pay at Pickup</span>
+                        <span className="text-xs text-gray-500">Cash or Card on arrival</span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-gray-900">₹0</span>
+                  </label>
+                </div>
+              </div>
+
               {/* Total Calculation */}
               <div className="space-y-3 py-6 border-t border-b border-gray-100">
                 <div className="flex justify-between text-gray-600">
@@ -271,12 +338,26 @@ const BookCar = () => {
                   <span className="font-medium text-gray-900">{totalDays} Days</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
+                  <span>Total Rent</span>
                   <span className="font-medium text-gray-900">₹{totalPrice.toLocaleString()}</span>
                 </div>
+                {paymentOption === 'partial' && (
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Pay Now (20%)</span>
+                    <span className="font-bold text-gray-900">₹{Math.round(totalPrice * 0.2).toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-lg pt-2">
-                  <span className="font-bold text-gray-900">Total Payable</span>
-                  <span className="font-bold text-blue-600">₹{totalPrice.toLocaleString()}</span>
+                  <span className="font-bold text-gray-900">
+                    {paymentOption === 'later' ? "Pay at Pickup" : "Pay Now"}
+                  </span>
+                  <span className="font-bold text-blue-600">
+                    ₹{paymentOption === 'full'
+                      ? totalPrice.toLocaleString()
+                      : paymentOption === 'partial'
+                        ? Math.round(totalPrice * 0.2).toLocaleString()
+                        : totalDays > 0 ? (totalPrice).toLocaleString() + " (Later)" : "0"}
+                  </span>
                 </div>
               </div>
 
@@ -290,11 +371,15 @@ const BookCar = () => {
                 <button
                   onClick={handleBooking}
                   disabled={!agree || processing || totalDays === 0}
-                  className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all
-                    ${agree && totalDays > 0 ? "bg-black text-white hover:bg-gray-800 shadow-lg" : "bg-gray-100 text-gray-400 cursor-not-allowed"}
+                  className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-xl
+                    ${agree && totalDays > 0 ? "bg-black text-white hover:bg-gray-800" : "bg-gray-100 text-gray-400 cursor-not-allowed"}
                   `}
                 >
-                  {processing ? "Processing..." : "Confirm & Pay"}
+                  {processing ? "Processing..." :
+                    paymentOption === 'later' ? "Confirm Booking (Pay at Pickup)" :
+                      paymentOption === 'partial' ? `Pay Deposit ₹${Math.round(totalPrice * 0.2).toLocaleString()}` :
+                        `Pay Now ₹${totalPrice.toLocaleString()}`
+                  }
                 </button>
               </div>
             </div>
