@@ -259,6 +259,12 @@ const Header = () => {
                   </Link>
                 )}
                 <Link
+                  to="/profile"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 font-medium rounded-xl hover:bg-gray-50"
+                >
+                  <User size={20} /> Profile
+                </Link>
+                <Link
                   to="/my-bookings"
                   className="flex items-center gap-3 px-4 py-3 text-gray-700 font-medium rounded-xl hover:bg-gray-50"
                 >
