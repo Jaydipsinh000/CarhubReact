@@ -85,6 +85,10 @@ const SellerAddCar = () => {
             if (formData.listingType === "Sell" && formData.reservationFee) {
                 fd.append("reservationFee", Number(formData.reservationFee));
             }
+            if (formData.lat) fd.append("lat", formData.lat);
+            if (formData.lng) fd.append("lng", formData.lng);
+            if (formData.address) fd.append("address", formData.address);
+
             formData.images.forEach((img) => fd.append("images", img));
 
             await addCar(fd);
@@ -251,13 +255,51 @@ const SellerAddCar = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* LOCATION CARD */}
+                        <div className="mt-6 pt-6 border-t border-gray-100">
+                            <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
+                                <span className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">03</span>
+                                Location
+                            </h3>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Address / City</label>
+                                <input
+                                    type="text"
+                                    name="address"
+                                    placeholder="e.g. Ahmedabad, Gujarat"
+                                    value={formData.address || ""}
+                                    onChange={handleChange}
+                                    onBlur={async (e) => {
+                                        if (!e.target.value) return;
+                                        try {
+                                            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e.target.value}`);
+                                            const data = await res.json();
+                                            if (data && data.length > 0) {
+                                                setFormData(prev => ({ ...prev, lat: data[0].lat, lng: data[0].lon }));
+                                            }
+                                        } catch (err) {
+                                            console.error("Geocoding failed", err);
+                                        }
+                                    }}
+                                    className="w-full px-5 py-3.5 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all outline-none font-bold text-gray-900 placeholder:text-gray-300 placeholder:font-medium"
+                                />
+                                <p className="text-xs text-gray-400 ml-1">Location coordinates are automatically fetched.</p>
+                                {(formData.lat && formData.lng) && (
+                                    <div className="ml-1 mt-2 text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-lg inline-block font-bold">
+                                        📍 Found: {parseFloat(formData.lat).toFixed(4)}, {parseFloat(formData.lng).toFixed(4)}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     {/* RIGHT COLUMN: IMAGES & SUBMIT */}
                     <div className="space-y-6">
                         <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 h-full flex flex-col">
                             <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
-                                <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">03</span>
+                                <span className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">04</span>
                                 Gallery
                             </h3>
 
@@ -331,8 +373,8 @@ const SellerAddCar = () => {
                         </div>
                     </div>
                 </form>
-            </div>
-        </SellerLayout>
+            </div >
+        </SellerLayout >
     );
 };
 

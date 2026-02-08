@@ -8,6 +8,19 @@ const carSchema = new mongoose.Schema(
       trim: true,
     },
 
+    features: {
+      type: [String],
+    },
+    location: {
+      lat: { type: Number, required: false },
+      lng: { type: Number, required: false },
+      address: { type: String, required: false }
+    },
+    history: {
+      type: String,
+      required: true,
+    },
+
     brand: {
       type: String,
       required: true,

@@ -62,6 +62,10 @@ const UserSchema = new mongoose.Schema(
     documentImage: {
       type: String, // Path to uploaded ID/Business Proof
     },
+    wishlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Car",
+    }],
     documentStatus: {
       type: String,
       enum: ["not_uploaded", "uploaded", "approved", "rejected"],

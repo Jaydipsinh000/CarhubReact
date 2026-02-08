@@ -18,6 +18,7 @@ import Terms from "./Pages/Terms.jsx";
 import RegisterSeller from "./Pages/RegisterSeller.jsx";
 import ForgotPassword from "./Pages/ForgotPassword.jsx";
 import ResetPassword from "./Pages/ResetPassword.jsx";
+import Wishlist from "./Pages/Wishlist.jsx";
 
 // Admin
 import AdminDashboard from "./admin/AdminDashboard.jsx";
@@ -75,8 +76,9 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/cars" element={<Cars />} />
-        <Route path="/cars/:id" element={<CarDetails />} />
+        <Route path="/cars" element={<Cars user={user} />} />
+        <Route path="/cars/:id" element={<CarDetails user={user} />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
         <Route path="/register-seller" element={<RegisterSeller />} />

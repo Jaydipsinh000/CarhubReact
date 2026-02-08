@@ -40,20 +40,38 @@ const AdminDashboard = () => {
 
   const [loading, setLoading] = useState(true);
 
+
+
   useEffect(() => {
-    getAdminStats()
-      .then((res) => setData(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    // Fetch Dashboard Stats
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5000/api/admin/stats", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setData({
+            ...data.stats,
+            recentBookings: data.recentBookings,
+            monthlyStats: data.chartData
+          });
+        }
+      } catch (error) {
+        console.error("Dashboard fetch error", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
   }, []);
 
   /* CARD DATA */
   const cards = [
     {
       title: "Total Revenue",
-      value: `₹${(
-        data.monthlyStats?.reduce((acc, curr) => acc + curr.revenue, 0) || 0
-      ).toLocaleString()}`,
+      value: `₹${(data.totalRevenue || 0).toLocaleString()}`,
       desc: "Total earnings",
       icon: DollarSign,
       color: "bg-emerald-500",
@@ -62,9 +80,9 @@ const AdminDashboard = () => {
       trend: "+12.5%",
     },
     {
-      title: "Active Bookings",
-      value: data.unavailableCars || 0,
-      desc: "Cars currently out",
+      title: "Total Bookings",
+      value: data.totalBookings || 0,
+      desc: "All time bookings",
       icon: Calendar,
       color: "bg-blue-500",
       bg: "bg-blue-50",
@@ -94,17 +112,7 @@ const AdminDashboard = () => {
   ];
 
   /* CHART DATA */
-  const chartData =
-    data.monthlyStats?.length > 0
-      ? data.monthlyStats
-      : [
-        { name: "Jan", bookings: 4, revenue: 12000 },
-        { name: "Feb", bookings: 7, revenue: 21000 },
-        { name: "Mar", bookings: 5, revenue: 15000 },
-        { name: "Apr", bookings: 12, revenue: 36000 },
-        { name: "May", bookings: 10, revenue: 30000 },
-        { name: "Jun", bookings: 16, revenue: 48000 },
-      ];
+  const chartData = data.monthlyStats?.length > 0 ? data.monthlyStats : [];
 
   const carPieData = [
     {
@@ -375,24 +383,18 @@ const AdminDashboard = () => {
                             <p className="text-xs text-gray-500">
                               {booking.carId?.brand}
                             </p>
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="text-[10px] text-gray-400">Owner:</span>
-                              <span className="text-[10px] bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-100 font-medium">
-                                {booking.carId?.createdBy?.name || "Admin"}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col items-start gap-1">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${booking.paymentStatus === "paid"
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${booking.status === "confirmed"
                               ? "bg-emerald-50 text-emerald-600 border-emerald-100"
                               : "bg-yellow-50 text-yellow-600 border-yellow-100"
                               }`}
                           >
-                            {booking.paymentStatus || "Pending"}
+                            {booking.status || "Pending"}
                           </span>
                           <span className="font-bold text-gray-900 text-sm">
                             ₹{booking.amount?.toLocaleString()}
@@ -402,16 +404,16 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold">
-                            {booking.fullName?.charAt(0) || "U"}
+                            {booking.user?.name?.charAt(0) || "U"}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{booking.fullName}</p>
-                            <p className="text-xs text-gray-400">{booking.phone}</p>
+                            <p className="text-sm font-medium text-gray-900">{booking.user?.name || "User"}</p>
+                            <p className="text-xs text-gray-400">{booking.user?.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-gray-500">
-                        {new Date(booking.startDate).toLocaleDateString()}
+                        {new Date(booking.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}

@@ -93,6 +93,84 @@ export const deleteBooking = async (req, res) => {
   }
 };
 
+// =======================
+// GET DASHBOARD STATS
+// =======================
+export const getDashboardStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalCars = await Car.countDocuments();
+    const totalBookings = await Booking.countDocuments();
+
+    // Calculate Total Revenue (only from confirmed/completed bookings)
+    const revenueAgg = await Booking.aggregate([
+      { $match: { status: { $in: ["confirmed", "completed"] } } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+    const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
+
+    // Recent Bookings
+    const recentBookings = await Booking.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("user", "name email")
+      .populate("carId", "name image");
+
+    // Monthly Revenue (for Chart)
+    const monthlyRevenue = await Booking.aggregate([
+      { $match: { status: { $in: ["confirmed", "completed"] } } },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          revenue: { $sum: "$amount" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Format data for Recharts (fill missing months with 0)
+    const chartData = Array.from({ length: 12 }, (_, i) => {
+      const found = monthlyRevenue.find(m => m._id === i + 1);
+      return {
+        name: new Date(0, i).toLocaleString('default', { month: 'short' }),
+        revenue: found ? found.revenue : 0
+      };
+    });
+
+    res.json({
+      success: true,
+      stats: {
+        totalUsers,
+        totalCars,
+        totalBookings,
+        totalRevenue
+      },
+      recentBookings,
+      chartData
+    });
+
+  } catch (error) {
+    console.error("Dashboard Stats Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch dashboard stats" });
+  }
+};
+
+// =======================
+// GET ALL USERS
+// =======================
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, users: users });
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch all users" });
+  }
+};
+
 // ==========================
 // GET PENDING SELLERS
 // ==========================

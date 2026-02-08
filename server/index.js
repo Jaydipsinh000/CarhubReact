@@ -10,6 +10,8 @@ import bookingRoutes from "./Routes/bookingRoutes.js";
 import paymentRoutes from "./Routes/paymentRoutes.js";
 import adminRoutes from "./Routes/adminRoutes.js";
 import sellerRoutes from "./Routes/sellerRoutes.js";
+import reviewRoutes from "./Routes/reviewRoutes.js";
+import wishlistRoutes from "./Routes/wishlistRoutes.js";
 
 
 
@@ -56,6 +58,8 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/seller", sellerRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/wishlist", wishlistRoutes);
 
 // Port
 const PORT = process.env.PORT || 5000;

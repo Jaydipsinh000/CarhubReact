@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchCarById, fetchCars, checkAvailability } from "../Services/carApi";
+import { getWishlist, toggleWishlist } from "../Services/wishlistApi";
 import { resolveImagePath, getCarImage } from "../utils/imageUtils";
-import { ChevronLeft, ChevronRight, Star, Shield, Zap, Settings, Fuel, Armchair, Calendar, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Shield, Zap, Settings, Fuel, Armchair, Calendar, ArrowRight, Heart } from "lucide-react";
 import AuthModal from "../Components/AuthModal";
 import CarLoader from "../Components/CarLoader";
+import ReviewSection from "../Components/ReviewSection";
+import { toast } from "react-toastify";
 
-const CarDetails = () => {
+import { getCarReviews } from "../Services/reviewApi";
+
+const CarDetails = ({ user }) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -16,8 +21,8 @@ const CarDetails = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [ratingStats, setRatingStats] = useState({ avg: 0, total: 0 });
 
   useEffect(() => {
     const load = async () => {
@@ -26,6 +31,18 @@ const CarDetails = () => {
         const all = await fetchCars();
         setCar(res.data.car);
         setMoreCars(all.data.cars.filter((c) => c._id !== id).slice(0, 4));
+
+        // Fetch Review Stats
+        const revRes = await getCarReviews(id);
+        if (revRes.data.success) {
+          setRatingStats(revRes.data.stats);
+        }
+
+        if (user) {
+          const wRes = await getWishlist();
+          const wishlist = wRes.data.wishlist || [];
+          setIsWishlisted(wishlist.some(w => w._id === id));
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -34,9 +51,7 @@ const CarDetails = () => {
     };
     load();
     window.scrollTo(0, 0);
-  }, [id]);
-
-
+  }, [id, user]);
 
   if (loading) {
     return <div className="h-screen flex items-center justify-center bg-gray-50"><CarLoader /></div>;
@@ -60,6 +75,23 @@ const CarDetails = () => {
       } else {
         navigate(`/book/${car._id}`);
       }
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    try {
+      const res = await toggleWishlist(id);
+      if (res.data.success) {
+        setIsWishlisted(!isWishlisted);
+        toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
+      }
+    } catch (error) {
+      console.error("Wishlist toggle error", error);
+      toast.error("Failed to update wishlist");
     }
   };
 
@@ -111,13 +143,28 @@ const CarDetails = () => {
           <div className="space-y-8">
             {/* Header */}
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider">
-                  {car.brand}
-                </span>
-                <span className="flex items-center gap-1 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  <Star size={12} className="text-yellow-400 fill-yellow-400" /> 4.9 (42 reviews)
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider">
+                    {car.brand}
+                  </span>
+                  <span className="flex items-center gap-1 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                    {ratingStats.total > 0 ? (
+                      <>{ratingStats.avg.toFixed(1)} ({ratingStats.total} reviews)</>
+                    ) : (
+                      "No reviews yet"
+                    )}
+                  </span>
+                </div>
+
+                {/* Wishlist Button */}
+                <button
+                  onClick={handleToggleWishlist}
+                  className={`p-3 rounded-full transition-colors ${isWishlisted ? "bg-red-50 text-red-500" : "bg-gray-50 text-gray-400 hover:text-red-500"}`}
+                >
+                  <Heart size={24} fill={isWishlisted ? "currentColor" : "none"} />
+                </button>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 font-display tracking-tight leading-tight mb-2">
                 {car.name}
@@ -219,8 +266,8 @@ const CarDetails = () => {
                   </div>
                 )}
                 {activeTab === 'reviews' && (
-                  <div className="bg-gray-50 rounded-xl p-6 text-center text-gray-500 animate-fade-in">
-                    <p>Verified reviews from recent renters will appear here.</p>
+                  <div className="animate-fade-in">
+                    <ReviewSection carId={id} user={user} />
                   </div>
                 )}
               </div>
