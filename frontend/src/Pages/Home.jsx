@@ -48,48 +48,49 @@ const Home = () => {
   return (
     <div className="w-full overflow-hidden bg-white">
       {/* --- HERO SECTION --- */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Image Background with Slow Zoom Effect */}
         <div className="absolute inset-0 z-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
-            <source src="https://videos.pexels.com/video-files/5634005/5634005-hd_1920_1080_24fps.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+          <motion.img
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
+            src="https://www.hdcarwallpapers.com/download/alpine_white_bmw_f82_m4-1920x1080.jpg"
+            alt="Luxury Car Background"
+            className="w-full h-full object-cover object-[75%] md:object-center"
+          />
+          {/* Gradient Overlays for better text visibility */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/90" />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 mt-20">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+        <div className="relative z-10 container mx-auto px-4 mt-20 md:mt-0">
+          <div className="flex flex-col lg:flex-row items-center gap-12 py-20 lg:py-0">
 
             {/* Left Text */}
             <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="lg:w-1/2 text-center lg:text-left space-y-8"
+              className="lg:w-1/2 text-center lg:text-left space-y-6"
             >
               <motion.div variants={fadeInUp}>
-                <span className="inline-flex items-center gap-2 py-1 px-4 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-200 text-sm font-medium backdrop-blur-md">
-                  <Star size={12} className="fill-blue-200" /> Premium Fleet Available
+                <span className="inline-flex items-center gap-2 py-1 px-3 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-200 text-xs font-bold backdrop-blur-md">
+                  <Star size={12} className="fill-blue-200" /> PREMIUM FLEET
                 </span>
               </motion.div>
 
-              <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[0.9] font-display">
+              <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-none md:leading-[0.9] font-display">
                 OWN THE <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-200 to-white">
                   MOMENT
                 </span>
               </motion.h1>
 
-              <motion.p variants={fadeInUp} className="text-lg md:text-xl text-gray-300 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+              <motion.p variants={fadeInUp} className="text-base md:text-xl text-gray-300 max-w-lg mx-auto lg:mx-0 font-light leading-relaxed">
                 Experience the thrill of driving the world's most exclusive vehicles.
-                Unmatched performance, comfort, and style tailored for you.
+                Unmatched performance, comfort, and style.
               </motion.p>
 
               <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -157,22 +158,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Brand Marquee */}
-        <div className="absolute bottom-0 w-full bg-black/40 backdrop-blur-sm border-t border-white/5 overflow-hidden py-6">
-          <div className="flex animate-marquee whitespace-nowrap gap-16 items-center">
-            {[...Array(2)].map((_, i) => (
-              <React.Fragment key={i}>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">Mercedes-Benz</span>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">BMW</span>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">Audi</span>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">Porsche</span>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">Range Rover</span>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">Tesla</span>
-                <span className="text-2xl font-bold text-white/30 uppercase tracking-widest mx-4">Ferrari</span>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+
       </section>
 
       {/* --- HOW IT WORKS --- */}

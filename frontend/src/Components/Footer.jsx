@@ -42,7 +42,7 @@ const Footer = () => {
         {/* SUPPORT */}
         <div>
           <h3 className="text-xl font-semibold mb-2">Support</h3>
-          <p className="text-gray-300">📍 Ahmedabad, India</p>
+          <p className="text-gray-300">📍 Lilapur Village, Sanand, Ahmedabad, India</p>
           <p className="text-gray-300">📞 +91 98765 43210</p>
           <p className="text-gray-300">✉ support@carent.com</p>
           <div className="mt-4">

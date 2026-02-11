@@ -165,19 +165,7 @@ const Cars = ({ user }) => {
                   />
                 </div>
 
-                {/* Search */}
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-400 uppercase">Search by Name</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition text-sm font-medium"
-                      placeholder="e.g. BMW X5"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-                </div>
+
 
                 {/* Brand */}
                 <div className="space-y-2">
