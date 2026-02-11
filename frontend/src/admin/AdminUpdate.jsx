@@ -15,6 +15,9 @@ const AdminUpdateCar = () => {
     fuelType: "Petrol",
     seats: "",
     transmission: "Manual",
+    address: "",
+    lat: null,
+    lng: null,
     images: [], // FILES
   });
 
@@ -38,6 +41,9 @@ const AdminUpdateCar = () => {
           fuelType: car.fuelType || "Petrol",
           seats: car.seats || "",
           transmission: car.transmission || "Manual",
+          address: car.location?.address || "",
+          lat: car.location?.lat || null,
+          lng: car.location?.lng || null,
           images: [], // ⚠️ fresh upload only
         });
       } catch (err) {
@@ -78,6 +84,10 @@ const AdminUpdateCar = () => {
       fd.append("fuelType", formData.fuelType);
       fd.append("seats", Number(formData.seats));
       fd.append("transmission", formData.transmission);
+
+      if (formData.lat) fd.append("lat", formData.lat);
+      if (formData.lng) fd.append("lng", formData.lng);
+      if (formData.address) fd.append("address", formData.address);
 
       formData.images.forEach((img) => fd.append("images", img));
 
@@ -175,6 +185,43 @@ const AdminUpdateCar = () => {
                         className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:bg-white transition-all outline-none"
                         required
                       />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-4 border-t border-gray-100">
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Location</h4>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Address / City</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          name="address"
+                          placeholder="e.g. Times Square, New York"
+                          value={formData.address || ""}
+                          onChange={handleChange}
+                          onBlur={async (e) => {
+                            if (!e.target.value) return;
+                            try {
+                              const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e.target.value}`);
+                              const data = await res.json();
+                              if (data && data.length > 0) {
+                                setFormData(prev => ({ ...prev, lat: data[0].lat, lng: data[0].lon }));
+                              }
+                            } catch (err) {
+                              console.error("Geocoding failed", err);
+                            }
+                          }}
+                          className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-100"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Coordinates will be auto-detected when you type an address.</p>
+
+                      {(formData.lat && formData.lng) && (
+                        <div className="mt-2 text-xs text-green-600 bg-green-50 px-2 py-1 rounded inline-block font-medium">
+                          📍 Detected: {parseFloat(formData.lat).toFixed(4)}, {parseFloat(formData.lng).toFixed(4)}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

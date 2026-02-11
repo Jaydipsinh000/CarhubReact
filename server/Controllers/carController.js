@@ -76,6 +76,16 @@ export const updateCar = async (req, res) => {
       req.body.images = req.files.map((file) => `/uploads/${file.filename}`.replace(/\\/g, "/"));
     }
 
+    // Handle Location Update
+    const { lat, lng, address } = req.body;
+    if (lat || lng || address) {
+      req.body.location = {
+        lat: lat ? parseFloat(lat) : null,
+        lng: lng ? parseFloat(lng) : null,
+        address: address || ""
+      };
+    }
+
     // 🔹 Ownership Check for Sellers
     const car = await Car.findById(id);
     if (!car) return res.status(404).json({ message: "Car not found" });

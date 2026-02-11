@@ -267,7 +267,7 @@ const CarDetails = ({ user }) => {
                 )}
                 {activeTab === 'reviews' && (
                   <div className="animate-fade-in">
-                    <ReviewSection carId={id} user={user} />
+                    <ReviewSection carId={id} user={user} onAuthRequire={() => setShowAuthModal(true)} />
                   </div>
                 )}
               </div>

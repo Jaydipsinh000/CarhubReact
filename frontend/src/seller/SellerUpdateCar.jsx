@@ -19,6 +19,9 @@ const SellerUpdateCar = () => {
         seats: "",
         transmission: "Manual",
         listingType: "Rent",
+        address: "",
+        lat: null,
+        lng: null,
         images: [],
     });
     const [existingImages, setExistingImages] = useState([]);
@@ -39,6 +42,9 @@ const SellerUpdateCar = () => {
                     seats: car.seats,
                     transmission: car.transmission,
                     listingType: car.listingType || "Rent",
+                    address: car.location?.address || "",
+                    lat: car.location?.lat || null,
+                    lng: car.location?.lng || null,
                     images: [],
                 });
                 setExistingImages(car.images || []);
@@ -84,6 +90,10 @@ const SellerUpdateCar = () => {
             fd.append("seats", Number(formData.seats));
             fd.append("transmission", formData.transmission);
             fd.append("listingType", formData.listingType);
+
+            if (formData.lat) fd.append("lat", formData.lat);
+            if (formData.lng) fd.append("lng", formData.lng);
+            if (formData.address) fd.append("address", formData.address);
 
             // New Images
             formData.images.forEach((img) => fd.append("images", img));
@@ -186,6 +196,43 @@ const SellerUpdateCar = () => {
                                             <option value="Sell">Sell (One-time)</option>
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* LOCATION SECTION */}
+                            <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
+                                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Location</h4>
+
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Address / City</label>
+                                    <div className="relative mt-2">
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            placeholder="e.g. Times Square, New York"
+                                            value={formData.address || ""}
+                                            onChange={handleChange}
+                                            onBlur={async (e) => {
+                                                if (!e.target.value) return;
+                                                try {
+                                                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${e.target.value}`);
+                                                    const data = await res.json();
+                                                    if (data && data.length > 0) {
+                                                        setFormData(prev => ({ ...prev, lat: data[0].lat, lng: data[0].lon }));
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Geocoding failed", err);
+                                                }
+                                            }}
+                                            className="w-full px-5 py-3.5 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all outline-none font-bold text-gray-900 placeholder:text-gray-300 placeholder:font-medium"
+                                        />
+                                        {(formData.lat && formData.lng) && (
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg font-bold border border-emerald-100">
+                                                📍 Detected
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2 ml-1 font-medium">Type location to auto-detect coordinates.</p>
                                 </div>
                             </div>
                         </div>
