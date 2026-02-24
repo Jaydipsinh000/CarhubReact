@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getMyBookings, createOrder, verifyPayment } from "../Services/paymentApi.js";
-import { Calendar, MapPin, CreditCard, Clock, ArrowRight, Car, Check } from "lucide-react";
+import { Calendar, MapPin, CreditCard, Clock, ArrowRight, Car, Check, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
