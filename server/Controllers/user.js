@@ -313,3 +313,44 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+// =======================
+// UPDATE PROFILE
+// =======================
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, phone } = req.body;
+    let updateData = { name, phone };
+
+    // If new photo is uploaded
+    if (req.file) {
+      updateData.photo = req.file.path; // Cloudinary URL
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password -otp -otpExpires");
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        photo: updatedUser.photo,
+        sellerVerificationStatus: updatedUser.sellerVerificationStatus,
+      },
+    });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({ success: false, message: "Failed to update profile", error: error.message });
+  }
+};

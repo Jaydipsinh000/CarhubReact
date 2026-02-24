@@ -19,3 +19,13 @@ export const loginUser = (loginData) => {
     headers: { "Content-Type": "application/json" },
   });
 };
+
+export const updateProfile = (formData) => {
+  const token = localStorage.getItem("token");
+  return axios.put(`${API_URL}/profile`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

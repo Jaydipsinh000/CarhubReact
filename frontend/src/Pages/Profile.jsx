@@ -2,17 +2,24 @@ import React, { useEffect, useState } from "react";
 import { User, Mail, Phone, Calendar, LogOut, ArrowRight, ShieldCheck, Clock, MapPin } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { getMyBookings } from "../Services/paymentApi.js";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({ name: "", phone: "" });
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setEditData({ name: parsedUser.name || "", phone: parsedUser.phone || "" });
       fetchBookings();
     } else {
       setLoading(false);
@@ -34,6 +41,36 @@ const Profile = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      setUpdateLoading(true);
+      const { updateProfile } = await import("../Services/authServices.js");
+
+      const fd = new FormData();
+      fd.append("name", editData.name);
+      fd.append("phone", editData.phone);
+      if (selectedPhoto) {
+        fd.append("photo", selectedPhoto);
+      }
+
+      const res = await updateProfile(fd);
+      if (res.data.success) {
+        const updatedUser = { ...user, ...res.data.user };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        toast.success("Profile updated successfully!");
+        setIsEditing(false);
+        setSelectedPhoto(null);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to update profile");
+    } finally {
+      setUpdateLoading(false);
+    }
   };
 
   if (!user && !loading) {
@@ -64,6 +101,7 @@ const Profile = () => {
 
   // Helper for Avatar
   const getAvatar = () => {
+    if (selectedPhoto) return URL.createObjectURL(selectedPhoto);
     if (user?.photo) return user.photo;
     return `https://ui-avatars.com/api/?name=${user?.name}&background=2563eb&color=fff&bold=true`;
   };
@@ -98,6 +136,18 @@ const Profile = () => {
                     alt="Profile"
                     className="w-full h-full rounded-full object-cover shadow-inner"
                   />
+                  {isEditing && (
+                    <label htmlFor="photo-upload" className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center cursor-pointer border-2 border-white shadow-lg">
+                      <Clock size={16} /> {/* Using clock as placeholder icon for upload */}
+                      <input
+                        type="file"
+                        id="photo-upload"
+                        className="hidden"
+                        onChange={(e) => setSelectedPhoto(e.target.files[0])}
+                        accept="image/*"
+                      />
+                    </label>
+                  )}
                 </div>
 
                 <h2 className="text-2xl font-bold text-gray-900 mb-1 font-display">{user?.name}</h2>
@@ -194,6 +244,34 @@ const Profile = () => {
                 <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2 font-display">
                   Personal Details
                 </h3>
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-xl"
+                  >
+                    Edit Profile
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditData({ name: user.name, phone: user.phone });
+                        setSelectedPhoto(null);
+                      }}
+                      className="text-sm font-bold text-gray-500 hover:text-gray-700 bg-gray-100 px-4 py-2 rounded-xl"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdateProfile}
+                      disabled={updateLoading}
+                      className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl disabled:opacity-50"
+                    >
+                      {updateLoading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="p-8">
@@ -201,16 +279,36 @@ const Profile = () => {
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Full Name</label>
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
-                      <User size={18} className="text-gray-400" />
-                      <span className="font-semibold text-gray-900">{user?.name}</span>
+                      <User size={18} className={`text-gray-400 ${isEditing ? 'text-blue-600' : ''}`} />
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editData.name}
+                          onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                          className="bg-transparent border-none outline-none font-semibold text-gray-900 w-full"
+                          autoFocus
+                        />
+                      ) : (
+                        <span className="font-semibold text-gray-900">{user?.name}</span>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Phone Number</label>
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
-                      <Phone size={18} className="text-gray-400" />
-                      <span className="font-semibold text-gray-900">{user?.phone || "Not provided"}</span>
+                      <Phone size={18} className={`text-gray-400 ${isEditing ? 'text-blue-600' : ''}`} />
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editData.phone}
+                          onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                          placeholder="Add phone number"
+                          className="bg-transparent border-none outline-none font-semibold text-gray-900 w-full"
+                        />
+                      ) : (
+                        <span className="font-semibold text-gray-900">{user?.phone || "Not provided"}</span>
+                      )}
                     </div>
                   </div>
 

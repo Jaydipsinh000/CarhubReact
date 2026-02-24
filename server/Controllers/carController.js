@@ -6,6 +6,7 @@ import Booking from "../Models/Booking.js";
 // ADMIN ADD CAR
 // =======================
 export const addCar = async (req, res) => {
+  console.log("--> Add Car: Request Received");
   try {
 
 
@@ -70,6 +71,7 @@ export const addCar = async (req, res) => {
 // UPDATE CAR
 // =======================
 export const updateCar = async (req, res) => {
+  console.log("--> Update Car: Request Received");
   try {
     const { id } = req.params;
     console.log("Update Car ID:", id);
