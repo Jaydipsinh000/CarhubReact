@@ -9,6 +9,7 @@ import {
 } from "../Controllers/carController.js";
 import { protect, adminOnly } from "../Middleware/authAdmin.js";
 import { sellerOnly } from "../Middleware/authSeller.js";
+import fs from "fs";
 import path from "path";
 import upload from "../Middleware/uploadMiddleware.js";
 
@@ -17,9 +18,7 @@ const router = express.Router();
 
 // Ensure uploads folder exists (legacy cleanup or for public assets)
 if (!fs.existsSync("uploads")) {
-  import("fs").then(fs => {
-    if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
-  });
+  fs.mkdirSync("uploads");
 }
 
 
