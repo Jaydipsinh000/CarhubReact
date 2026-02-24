@@ -194,6 +194,19 @@ const MyBookings = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* HANDOVER CODE BOX */}
+                  {booking.status === "confirmed" && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-blue-100 flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-bottom-2">
+                      <div>
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Handover Code</p>
+                        <p className="text-xl font-black text-gray-900 tracking-[0.2em]">{booking.handoverCode}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[8px] text-gray-400 font-bold uppercase leading-tight">Give this to<br />the seller</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* CONTENT */}

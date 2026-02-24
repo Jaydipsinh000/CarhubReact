@@ -20,6 +20,7 @@ router.get("/seller-bookings", authUser, sellerOnly, getSellerBookings);
 
 // Lifecycle Routes
 router.patch("/status/:id", authUser, sellerOnly, updateBookingStatus);
+router.post("/verify-handover/:id", authUser, sellerOnly, verifyHandover);
 router.post("/pay/:id", authUser, settlePayment);
 
 export default router;

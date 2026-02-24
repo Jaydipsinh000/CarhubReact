@@ -52,6 +52,9 @@ const bookingSchema = new mongoose.Schema(
       enum: ["Rent", "Sale"],
       default: "Rent",
     },
+    handoverCode: {
+      type: String, // 4-digit verification code
+    },
   },
   { timestamps: true }
 );

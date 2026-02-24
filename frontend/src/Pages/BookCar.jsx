@@ -117,6 +117,17 @@ const BookCar = () => {
     }
     if (!agree) return alert("Please accept the Terms & Conditions to proceed");
 
+    // Phone Validation (Indian style - 10 digits)
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(form.phone)) {
+      return alert("Please enter a valid 10-digit mobile number");
+    }
+
+    // Address Validation
+    if (form.address.length < 10) {
+      return alert("Please enter a complete address (at least 10 characters)");
+    }
+
     setProcessing(true);
 
     try {

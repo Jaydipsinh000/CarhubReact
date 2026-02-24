@@ -24,6 +24,8 @@ const SellerBookings = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedBooking, setSelectedBooking] = useState(null); // Modal State
+    const [handoverModal, setHandoverModal] = useState({ show: false, bookingId: "", code: "" });
+    const [verifying, setVerifying] = useState(false);
 
     const toggleModal = (booking) => {
         setSelectedBooking(booking);
@@ -52,6 +54,24 @@ const SellerBookings = () => {
         } catch (error) {
             console.error("Update Status Error:", error);
             toast.error("Failed to update status");
+        }
+    };
+
+    const handleVerifyHandover = async () => {
+        if (handoverModal.code.length !== 4) return toast.error("Please enter 4-digit code");
+
+        try {
+            setVerifying(true);
+            const { verifyHandover } = await import("../Services/sellerApi.js");
+            const res = await verifyHandover(handoverModal.bookingId, handoverModal.code);
+
+            toast.success(res.data.message);
+            setBookings(prev => prev.map(b => b._id === handoverModal.bookingId ? { ...b, status: "active" } : b));
+            setHandoverModal({ show: false, bookingId: "", code: "" });
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Invalid Handover Code");
+        } finally {
+            setVerifying(false);
         }
     };
 
@@ -212,10 +232,10 @@ const SellerBookings = () => {
                                                     </button>
                                                     {(!booking.status || booking.status === "confirmed") && (
                                                         <button
-                                                            onClick={() => handleStatusUpdate(booking._id, "active")}
+                                                            onClick={() => setHandoverModal({ show: true, bookingId: booking._id, code: "" })}
                                                             className="px-3 py-1.5 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-blue-700 transition"
                                                         >
-                                                            Pickup
+                                                            Verify & Pickup
                                                         </button>
                                                     )}
                                                     {booking.status === "active" && (
@@ -351,6 +371,49 @@ const SellerBookings = () => {
                                         <span className="text-lg font-black text-emerald-600">₹{(selectedBooking.paidAmount || 0).toLocaleString()}</span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* HANDOVER VERIFICATION MODAL */}
+            {handoverModal.show && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !verifying && setHandoverModal({ show: false, bookingId: "", code: "" })}></div>
+                    <div className="relative bg-white rounded-[2.5rem] w-full max-w-sm p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-center">
+                        <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                            <ShieldCheck size={40} />
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 font-display mb-2">Verify Handover</h2>
+                        <p className="text-gray-500 text-sm font-medium mb-8">Enter the 4-digit code provided by the customer to start the trip.</p>
+
+                        <div className="space-y-6">
+                            <input
+                                type="text"
+                                maxLength="4"
+                                placeholder="0 0 0 0"
+                                value={handoverModal.code}
+                                onChange={(e) => setHandoverModal({ ...handoverModal, code: e.target.value.replace(/\D/g, "") })}
+                                className="w-full text-center text-4xl font-black tracking-[0.5em] py-5 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-blue-500 focus:bg-white transition-all outline-none"
+                                autoFocus
+                            />
+
+                            <div className="flex gap-3">
+                                <button
+                                    disabled={verifying}
+                                    onClick={() => setHandoverModal({ show: false, bookingId: "", code: "" })}
+                                    className="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    disabled={verifying || handoverModal.code.length !== 4}
+                                    onClick={handleVerifyHandover}
+                                    className="flex-[2] py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition shadow-xl shadow-blue-200 disabled:opacity-50"
+                                >
+                                    {verifying ? "Verifying..." : "Confirm Delivery"}
+                                </button>
                             </div>
                         </div>
                     </div>

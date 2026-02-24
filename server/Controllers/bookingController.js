@@ -43,7 +43,8 @@ export const createBooking = async (req, res) => {
       emergencyName,
       emergencyPhone,
       paidAmount: paymentStatus === 'paid' ? amount : 0, // If paid upfront, set paidAmount
-      status: "confirmed"
+      status: "confirmed",
+      handoverCode: Math.floor(1000 + Math.random() * 9000).toString(), // Generate 4-digit code
     });
 
     console.log("Booking Created:", booking._id);
@@ -150,5 +151,38 @@ export const settlePayment = async (req, res) => {
   } catch (error) {
     console.error("Payment Error:", error);
     res.status(500).json({ success: false, message: "Payment failed" });
+  }
+};
+// =======================
+// VERIFY HANDOVER (Seller only)
+// =======================
+export const verifyHandover = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { handoverCode } = req.body;
+
+    const booking = await Booking.findById(id).populate("carId");
+    if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
+
+    // Ensure car belongs to this seller
+    if (booking.carId.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Not authorized to verify this handover" });
+    }
+
+    if (booking.handoverCode !== handoverCode) {
+      return res.status(400).json({ success: false, message: "Invalid Handover Code" });
+    }
+
+    booking.status = "active"; // Mark as picked up
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Handover verified! Car is now marked as Picked Up.",
+      booking
+    });
+  } catch (error) {
+    console.error("Handover Verification Error:", error);
+    res.status(500).json({ success: false, message: "Verification failed" });
   }
 };
