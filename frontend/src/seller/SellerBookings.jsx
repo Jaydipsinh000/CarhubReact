@@ -15,9 +15,11 @@ import {
     MoreHorizontal,
     CheckCircle,
     XCircle,
-    Download
+    Download,
+    ShieldCheck
 } from "lucide-react";
 import { getCarImage } from "../utils/imageUtils.js";
+import { verifyHandover } from "../Services/sellerApi.js";
 
 const SellerBookings = () => {
     const [bookings, setBookings] = useState([]);
