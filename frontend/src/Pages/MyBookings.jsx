@@ -196,14 +196,21 @@ const MyBookings = () => {
                   </div>
 
                   {/* HANDOVER CODE BOX */}
-                  {booking.status === "confirmed" && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-xl border border-blue-100 flex items-center justify-between shadow-lg animate-in fade-in slide-in-from-bottom-2">
+                  {booking.status === "confirmed" && booking.handoverCode && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-blue-100 flex items-center justify-between shadow-2xl shadow-blue-900/10 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden group/code">
+                      {/* Subtle blue accent */}
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-600" />
+
                       <div>
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Handover Code</p>
-                        <p className="text-xl font-black text-gray-900 tracking-[0.2em]">{booking.handoverCode}</p>
+                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-1">Delivery PIN</p>
+                        <p className="text-3xl font-black text-gray-900 tracking-[0.25em] font-mono">{booking.handoverCode}</p>
                       </div>
+
                       <div className="text-right">
-                        <p className="text-[8px] text-gray-400 font-bold uppercase leading-tight">Give this to<br />the seller</p>
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-1 ml-auto border border-blue-100">
+                          <ShieldCheck size={20} />
+                        </div>
+                        <p className="text-[8px] text-gray-400 font-bold uppercase leading-tight tracking-wider">Give to<br />Seller</p>
                       </div>
                     </div>
                   )}

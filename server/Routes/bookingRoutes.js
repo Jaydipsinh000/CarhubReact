@@ -1,5 +1,5 @@
 import express from "express";
-import { createBooking, getMyBookings, getSellerBookings, updateBookingStatus, settlePayment } from "../Controllers/bookingController.js";
+import { createBooking, getMyBookings, getSellerBookings, updateBookingStatus, settlePayment, verifyHandover } from "../Controllers/bookingController.js";
 import authUser from "../Middleware/authUser.js";
 
 import { sellerOnly } from "../Middleware/authSeller.js";
