@@ -10,8 +10,8 @@ export const addCar = async (req, res) => {
 
 
     const { name, brand, pricePerDay, fuelType, seats, transmission, listingType, reservationFee, features, lat, lng, address } = req.body;
-
-    // Handle Image Uploads
+    console.log("Add Car Body:", req.body);
+    console.log("Add Car Files:", req.files);
     // Cloudinary returns file.path as the full secure URL
     const imagePaths = req.files.map((file) => file.path);
 
@@ -72,6 +72,9 @@ export const addCar = async (req, res) => {
 export const updateCar = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("Update Car ID:", id);
+    console.log("Update Car Body:", req.body);
+    console.log("Update Car Files:", req.files);
 
     if (req.files && req.files.length > 0) {
       req.body.images = req.files.map((file) => file.path);
