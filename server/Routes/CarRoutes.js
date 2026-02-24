@@ -10,6 +10,7 @@ import {
 import { protect, adminOnly } from "../Middleware/authAdmin.js";
 import { sellerOnly } from "../Middleware/authSeller.js";
 import fs from "fs";
+import multer from "multer";
 import path from "path";
 import upload from "../Middleware/uploadMiddleware.js";
 
