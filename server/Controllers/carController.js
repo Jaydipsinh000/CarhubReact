@@ -12,7 +12,8 @@ export const addCar = async (req, res) => {
     const { name, brand, pricePerDay, fuelType, seats, transmission, listingType, reservationFee, features, lat, lng, address } = req.body;
 
     // Handle Image Uploads
-    const imagePaths = req.files.map((file) => `/uploads/${file.filename}`.replace(/\\/g, "/"));
+    // Cloudinary returns file.path as the full secure URL
+    const imagePaths = req.files.map((file) => file.path);
 
     if (!imagePaths || imagePaths.length === 0) {
       return res.status(400).json({
@@ -73,7 +74,7 @@ export const updateCar = async (req, res) => {
     const { id } = req.params;
 
     if (req.files && req.files.length > 0) {
-      req.body.images = req.files.map((file) => `/uploads/${file.filename}`.replace(/\\/g, "/"));
+      req.body.images = req.files.map((file) => file.path);
     }
 
     // Handle Location Update
@@ -133,24 +134,32 @@ export const deleteCar = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to delete this car" });
     }
 
-    // 🔹 Delete images from storage
+    // 🔹 Delete images from Cloudinary
     if (car.images && car.images.length > 0) {
-      const fs = await import("fs");
-      const path = await import("path");
+      const { v2: cloudinary } = await import("cloudinary");
 
-      car.images.forEach(imagePath => {
-        // imagePath is like "/uploads/filename.jpg"
-        const filename = imagePath.split("/").pop(); // filename.jpg
-        const filePath = path.join(process.cwd(), "uploads", filename);
-
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error(`Failed to delete file: ${filePath}`, err);
-          } else {
-            console.log(`Deleted file: ${filePath}`);
-          }
-        });
+      // Initialize cloudinary
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
       });
+
+      for (const imagePath of car.images) {
+        try {
+          // Extract public_id from Cloudinary URL
+          // Example: https://res.cloudinary.com/cloudname/image/upload/v12345/carent_uploads/filename.jpg
+          const parts = imagePath.split("/");
+          const fileNameWithExt = parts.pop();
+          const folder = parts.pop();
+          const publicId = `${folder}/${fileNameWithExt.split(".")[0]}`;
+
+          await cloudinary.uploader.destroy(publicId);
+          console.log(`Deleted from Cloudinary: ${publicId}`);
+        } catch (err) {
+          console.error(`Failed to delete Cloudinary image: ${imagePath}`, err);
+        }
+      }
     }
 
     await car.deleteOne();

@@ -9,38 +9,18 @@ import {
 } from "../Controllers/carController.js";
 import { protect, adminOnly } from "../Middleware/authAdmin.js";
 import { sellerOnly } from "../Middleware/authSeller.js";
-import multer from "multer";
-import fs from "fs";
-import Car from "../Models/Cars.js";
 import path from "path";
+import upload from "../Middleware/uploadMiddleware.js";
 
 
 const router = express.Router();
 
-// Ensure uploads folder exists
-if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
-
-// Multer setup
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() + "-" + Math.round(Math.random() * 1e9) + path.extname(file.originalname).toLowerCase();
-    cb(null, uniqueName);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      cb(new Error("Only image files allowed"));
-    }
-    cb(null, true);
-  },
-});
+// Ensure uploads folder exists (legacy cleanup or for public assets)
+if (!fs.existsSync("uploads")) {
+  import("fs").then(fs => {
+    if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
+  });
+}
 
 
 // PUBLIC ROUTES

@@ -1,27 +1,30 @@
 import multer from "multer";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import dotenv from "dotenv";
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // We will store in 'uploads/' root folder
-        cb(null, "uploads/");
-    },
-    filename: (req, file, cb) => {
-        // Unique filename: fieldname-timestamp-random.ext
-        const uniqueName = `${file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname).toLowerCase()}`;
-        cb(null, uniqueName);
+dotenv.config();
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Cloudinary Storage
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "carent_uploads",
+        allowed_formats: ["jpg", "png", "jpeg", "webp"],
+        transformation: [{ width: 1000, height: 1000, crop: "limit" }], // Optional resize
     },
 });
 
 const upload = multer({
     storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-    fileFilter: (req, file, cb) => {
-        if (!file.mimetype.startsWith("image/")) {
-            return cb(new Error("Only image files are allowed"), false);
-        }
-        cb(null, true);
-    },
 });
 
 export default upload;
