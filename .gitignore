@@ -3,3 +3,5 @@ android/
 
 # IDE settings
 .idea/
+# (specific Android files were listed here mistakenly; remove them)
+# Use `git rm -r --cached android` to untrack existing files instead.
