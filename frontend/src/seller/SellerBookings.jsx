@@ -64,7 +64,6 @@ const SellerBookings = () => {
 
         try {
             setVerifying(true);
-            const { verifyHandover } = await import("../Services/sellerApi.js");
             const res = await verifyHandover(handoverModal.bookingId, handoverModal.code);
 
             toast.success(res.data.message);
